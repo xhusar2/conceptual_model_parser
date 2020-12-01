@@ -1,0 +1,9 @@
+#find all in subgraph
+​MATCH (n)-[*]-(connected) WHERE n.name = 'Grade' return connected
+
+#find all with parameter
+MATCH (n:Attribute)-[*]-(connected) WHERE n.name = 'Attribute B' return connected
+
+#find all based on cardinality
+MATCH (n:Class)-[r]-(connected) WHERE exists(r.src_cardinality_lower_val) return connected,r
+MATCH (n:Class)-[r]-()-[*]-(connected) WHERE r.src_cardinality_lower_val="0" return connected,r
