@@ -1,0 +1,109 @@
+from neomodel import StructuredNode, StringProperty, ArrayProperty, RelationshipTo, RelationshipFrom, Relationship,\
+    config, StructuredRel, JSONProperty, UniqueIdProperty
+from neomodel import db as neodb
+from model.Association import Association
+from model.Generalization import Generalization
+import json
+
+
+config.DATABASE_URL = 'bolt://neo4j:password@localhost:7687'
+
+
+class Model_parser:
+
+    def __init__(self):
+        pass
+
+    def delete_all(self):
+        neodb.cypher_query("MATCH ()-[r]-() DETACH DELETE r")
+        neodb.cypher_query("MATCH (n) DETACH DELETE n")
+
+    def add_to_db(self, model):
+        nodes = {}
+        count = 0
+        for n in model.nodes:
+            node = Class(class_id=n.id, name=n.name)
+            #print(n.name)
+            nodes[n.id] = node
+            node.save()
+            for a in n.attributes:
+                attrib = Attribute(attrib_id=a.id, name=a.name)
+                print(a.name, a.id)
+                attrib.save()
+                node.attribute.connect(attrib)
+            count += 1
+            print(count)
+        count = 0
+        for n in model.generalization_sets:
+            #if n type is class
+            node = GeneralizationSet(gs_id=n.id, name=n.name, attributes=[str(a) for a in n.attributes])
+            #print(n.name)
+            nodes[n.id] = node
+            node.save()
+            count += 1
+            print(count)
+
+        for r in model.relations:
+            if isinstance(r, Association):
+                if r.src in nodes and r.dest in nodes:
+                    rel1 = nodes[r.dest].association.connect(nodes[r.src])
+                    rel = nodes[r.src].association.connect(nodes[r.dest])
+                    rel.association_type = r.relation_type
+                    rel.src_properties = r.src_props
+                    rel.dest_properties = r.dest_props
+                    rel.association_id = r.id
+                    rel.src_cardinality_lower_val = r.src_cardinality_lower_val
+                    rel.src_cardinality_upper_val = r.src_cardinality_upper_val
+                    rel.dest_cardinality_lower_val = r.dest_cardinality_lower_val
+                    rel.dest_cardinality_upper_val = r.dest_cardinality_upper_val
+                    #rel.dest_cardinality = r.dest_cardinality
+                    rel.save()
+            elif isinstance(r, Generalization):
+                #print(r)
+                if r.src is not None:
+                    rel = nodes[r.src].generalization.connect(nodes[r.dest])
+                    rel._type = r.relation_type
+                    rel.src_properties = []
+                    rel.dest_properties = []
+                    rel.generalization_id = r.id
+
+
+class GeneralizationRel(StructuredRel):
+    generalization_id = StringProperty()
+    _type = StringProperty()
+    src_properties = JSONProperty()
+    dest_properties = JSONProperty()
+
+class AssociationRel(StructuredRel):
+    association_id = StringProperty()
+    association_type = StringProperty()
+    src_cardinality_lower_val = StringProperty()
+    src_cardinality_upper_val = StringProperty()
+    dest_cardinality_lower_val = StringProperty()
+    dest_cardinality_upper_val = StringProperty()
+    src_properties = JSONProperty()
+    dest_properties = JSONProperty()
+
+class GeneralizationSet(StructuredNode):
+    gs_id = UniqueIdProperty()
+    name = StringProperty()
+    #generalization = Relationship("Class", "generalization", model=GeneralizationRel)
+    #association = Relationship("Class", "association", model=AssociationRel)
+    attributes = ArrayProperty()
+
+
+class Attribute(StructuredNode):
+    attrib_id = UniqueIdProperty()
+    name = StringProperty()
+    attrib_type = StringProperty()
+
+
+
+class Class(StructuredNode):
+    class_id = UniqueIdProperty()
+    name = StringProperty()
+    generalization = Relationship("Class", "generalization", model=GeneralizationRel)
+    association = Relationship("Class", "association", model=AssociationRel)
+    #attributes = JSONProperty()
+    attribute = Relationship("Attribute", "has")
+
