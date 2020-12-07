@@ -4,6 +4,9 @@ from model.Association import Association
 from model.Generalization import Generalization
 from model.Attribute import Attribute
 from model.GeneralizationSet import GeneralizationSet
+
+import re
+
 import json
 
 class Model:
@@ -20,14 +23,37 @@ class Model:
         self.nodes = []
         self.relations = []
         self.generalization_sets = []
+        self.class_types = {}
+        self.association_types = {}
         self.model = self.get_model()
         self.parse_model()
+
+    def parse_types(self):
+        class_types = self.model.findall('.//*[@base_Class]', self.namespaces)
+        #print("here")
+        for t in class_types:
+            name = re.sub(r"\{.*\}","", t.tag)
+            #print(name, t.attrib['base_Class'])
+            #self.class_types.append(ClassType(t.attrib['base_Class'], name))
+            self.class_types[t.attrib['base_Class']] = name
+
+        #association types
+        association_types = self.model.findall('.//*[@base_Association]', self.namespaces)
+        for t in association_types:
+            name = re.sub(r"\{.*\}","", t.tag)
+            self.association_types[t.attrib['base_Association']] = name
+            #print(name, t.attrib['base_Association'])
+
+            #self.association_types.append(AssociationType(t.attrib['base_Association'], name))
+
 
 
     def parse_model(self):
         self.parse_classes()
         self.parse_associations()
         self.parse_generalization_sets()
+        self.parse_types()
+
 
     def parse_generalization_sets(self):
         gsets = self.model.findall('.//packagedElement[@xmi:type="uml:GeneralizationSet"]', self.namespaces)

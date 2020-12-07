@@ -22,7 +22,10 @@ class Model_parser:
         nodes = {}
         count = 0
         for n in model.nodes:
-            node = Class(class_id=n.id, name=n.name)
+            class_type = ""
+            if n.id in model.class_types:
+                class_type = model.class_types[n.id]
+            node = Class(class_id=n.id, name=n.name, type=class_type)
             #print(n.name)
             nodes[n.id] = node
             node.save()
@@ -31,8 +34,7 @@ class Model_parser:
                 print(a.name, a.id)
                 attrib.save()
                 node.attribute.connect(attrib)
-            count += 1
-            print(count)
+
         count = 0
         for n in model.generalization_sets:
             #if n type is class
@@ -48,7 +50,10 @@ class Model_parser:
                 if r.src in nodes and r.dest in nodes:
                     rel1 = nodes[r.dest].association.connect(nodes[r.src])
                     rel = nodes[r.src].association.connect(nodes[r.dest])
-                    rel.association_type = r.relation_type
+                    relation_type = ""
+                    if r.id in model.association_types:
+                        relation_type = model.association_types[r.id]
+                    rel.association_type = relation_type
                     rel.src_properties = r.src_props
                     rel.dest_properties = r.dest_props
                     rel.association_id = r.id
@@ -76,6 +81,7 @@ class GeneralizationRel(StructuredRel):
 
 class AssociationRel(StructuredRel):
     association_id = StringProperty()
+    relation_type = "Association"
     association_type = StringProperty()
     src_cardinality_lower_val = StringProperty()
     src_cardinality_upper_val = StringProperty()
@@ -102,8 +108,10 @@ class Attribute(StructuredNode):
 class Class(StructuredNode):
     class_id = UniqueIdProperty()
     name = StringProperty()
+    type = StringProperty()
     generalization = Relationship("Class", "generalization", model=GeneralizationRel)
     association = Relationship("Class", "association", model=AssociationRel)
     #attributes = JSONProperty()
     attribute = Relationship("Attribute", "has")
+
 
