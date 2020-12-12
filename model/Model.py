@@ -11,22 +11,28 @@ import json
 
 class Model:
 
-    namespaces = {'xmi': 'http://schema.omg.org/spec/XMI/2.1',
-                  'uml': 'http://schema.omg.org/spec/UML/2.1'}
+    namespaces = {'xmi': 'http://www.omg.org/spec/XMI/20110701',#'http://schema.omg.org/spec/XMI/2.1',
+                  'uml': 'http://www.omg.org/spec/UML/20110701'}#'http://schema.omg.org/spec/UML/2.1'}
     type_attrib = "{" + namespaces['xmi'] + "}type"
     #type_value_generalization = "uml:Generalization"
     #type_value_association = "uml:Association"
 
     def __init__(self, name, model_file):
         self.name = name
+        #use package as model id
+        self.id = ""
         self.model_file = model_file
         self.nodes = []
         self.relations = []
         self.generalization_sets = []
         self.class_types = {}
         self.association_types = {}
+        self.get_namespaces()
         self.model = self.get_model()
         self.parse_model()
+
+    def get_namespaces(self):
+        self.namespaces = etree.parse(self.model_file).getroot().nsmap
 
     def parse_types(self):
         class_types = self.model.findall('.//*[@base_Class]', self.namespaces)
@@ -46,9 +52,20 @@ class Model:
 
             #self.association_types.append(AssociationType(t.attrib['base_Association'], name))
 
+    def get_id(self):
+        packagedElement = self.model.find('./packagedElement', self.namespaces)
+        if packagedElement is not None:
+        #print(packagedElement)
+        #print(packagedElement.attrib)
+            return packagedElement.attrib['{' + self.namespaces['xmi'] + '}' + 'id']
+        id_attrib = '{' + self.namespaces['xmi'] + '}' + ':id'
+        if id_attrib in self.model.attrib:
+            return self.model.attrib[id_attrib]
+        return ""
 
 
     def parse_model(self):
+        self.id = self.get_id()
         self.parse_classes()
         self.parse_associations()
         self.parse_generalization_sets()
@@ -113,18 +130,32 @@ class Model:
         name = ""
         if "name" in a.attrib:
             name = a.attrib["name"]
+
         # memberends
         memberends = a.findall('memberEnd', self.namespaces)
+
         src_prop["id"] = None
         dest_prop["id"] = None
         aggregation = 'none'
+
+        #memberends openponk
+        if "memberEnd" in a.attrib:
+            format = "openPonk"
+            parts = a.attrib['memberEnd'].split(' ')
+            src_prop["id"] = self.find_ref_element(model, parts[0], format)
+            dest_prop["id"] = self.find_ref_element(model, parts[1], format)
+            aggregation = "open_ponk_format"
+
+
         for m in memberends:
+            format = "EA"
             idref = m.attrib["{" + self.namespaces['xmi'] + "}" + "idref"]
-            aggregation = model.xpath('.//*[@xmi:id="' + idref + '"]/@aggregation', namespaces=self.namespaces)[0]
+            if aggregation != "none":
+                aggregation = model.xpath('.//*[@xmi:id="' + idref + '"]/@aggregation', namespaces=self.namespaces)[0]
             if 'src' in idref:
-                src_prop["id"] = self.find_ref_element(model, idref)
+                src_prop["id"] = self.find_ref_element(model, idref, format)
             if 'dst' in idref:
-                dest_prop["id"] = self.find_ref_element(model, idref)
+                dest_prop["id"] = self.find_ref_element(model, idref, format)
                 #print(dst)
         association = Association(assoc_id, name, src_prop, dest_prop)
 
@@ -186,10 +217,15 @@ class Model:
             self.parse_association(a)
 
 
-    def find_ref_element(self, model, idref):
-        xpath = './/*[@xmi:id="' + idref + '"]/type/@xmi:idref'
-        ref_element = model.xpath(xpath, namespaces=self.namespaces)[0]
-        return ref_element
+    def find_ref_element(self, model, idref, format):
+        if format == "EA":
+            xpath = './/*[@xmi:id="' + idref + '"]/type/@xmi:idref'
+            ref_element = model.xpath(xpath, namespaces=self.namespaces)[0]
+            return ref_element
+        if format == "openPonk":
+            xpath = './/*[@xmi:id="' + idref + '"]/@type'
+            ref_element = model.xpath(xpath, namespaces=self.namespaces)[0]
+            return ref_element
 
 
 

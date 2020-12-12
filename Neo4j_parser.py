@@ -25,20 +25,20 @@ class Model_parser:
             class_type = ""
             if n.id in model.class_types:
                 class_type = model.class_types[n.id]
-            node = Class(class_id=n.id, name=n.name, type=class_type)
+            node = Class(class_id=n.id, name=n.name, type=class_type, model_id=model.id)
             #print(n.name)
             nodes[n.id] = node
             node.save()
             for a in n.attributes:
-                attrib = Attribute(attrib_id=a.id, name=a.name)
-                print(a.name, a.id)
+                attrib = Attribute(attrib_id=a.id, name=a.name, model_id=model.id)
+                #print(a.name, a.id)
                 attrib.save()
                 node.attribute.connect(attrib)
 
         count = 0
         for n in model.generalization_sets:
             #if n type is class
-            node = GeneralizationSet(gs_id=n.id, name=n.name, attributes=[str(a) for a in n.attributes])
+            node = GeneralizationSet(gs_id=n.id, name=n.name, attributes=[str(a) for a in n.attributes], model_id=model.id)
             #print(n.name)
             nodes[n.id] = node
             node.save()
@@ -66,7 +66,7 @@ class Model_parser:
             elif isinstance(r, Generalization):
                 #print(r)
                 if r.src is not None:
-                    rel = nodes[r.src].generalization.connect(nodes[r.dest])
+                    rel = nodes[r.dest].generalization.connect(nodes[r.src])
                     rel._type = r.relation_type
                     rel.src_properties = []
                     rel.dest_properties = []
@@ -91,6 +91,7 @@ class AssociationRel(StructuredRel):
     dest_properties = JSONProperty()
 
 class GeneralizationSet(StructuredNode):
+    model_id = StringProperty()
     gs_id = UniqueIdProperty()
     name = StringProperty()
     #generalization = Relationship("Class", "generalization", model=GeneralizationRel)
@@ -99,6 +100,7 @@ class GeneralizationSet(StructuredNode):
 
 
 class Attribute(StructuredNode):
+    model_id = StringProperty()
     attrib_id = UniqueIdProperty()
     name = StringProperty()
     attrib_type = StringProperty()
@@ -106,6 +108,7 @@ class Attribute(StructuredNode):
 
 
 class Class(StructuredNode):
+    model_id = StringProperty()
     class_id = UniqueIdProperty()
     name = StringProperty()
     type = StringProperty()

@@ -36,7 +36,7 @@ def main(argv):
       for root, directories, files in path:
          for file in files:
             print(file)
-            if str(file).endswith('.xml'):
+            if str(file).endswith('.xml') or str(file).endswith('.xmi'):
                models.append(Model(file, os.path.join(dir, file)))
 
       neo4j_parser = Model_parser()
