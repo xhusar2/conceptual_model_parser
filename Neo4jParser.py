@@ -9,7 +9,7 @@ import json
 config.DATABASE_URL = 'bolt://neo4j:password@localhost:7687'
 
 
-class Model_parser:
+class ModelParser:
 
     def __init__(self):
         pass
@@ -21,6 +21,7 @@ class Model_parser:
     def add_to_db(self, model):
         nodes = {}
         count = 0
+
         for n in model.nodes:
             class_type = ""
             if n.id in model.class_types:

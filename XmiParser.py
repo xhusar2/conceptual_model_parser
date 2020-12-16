@@ -4,7 +4,7 @@ import os
 import sys, getopt
 
 from model.Model import Model
-from Neo4j_parser import Model_parser
+from Neo4jParser import ModelParser
 
 #open xmi file
 def main(argv):
@@ -27,7 +27,7 @@ def main(argv):
       print('Input file is ', inputfile)
       m = Model("model_1", inputfile)
       m.parse_model()
-      n_parser = Model_parser(m)
+      n_parser = ModelParser(m)
       n_parser.delete_all()
       n_parser.parse()
    elif dir != '':
@@ -39,7 +39,7 @@ def main(argv):
             if str(file).endswith('.xml') or str(file).endswith('.xmi'):
                models.append(Model(file, os.path.join(dir, file)))
 
-      neo4j_parser = Model_parser()
+      neo4j_parser = ModelParser()
       neo4j_parser.delete_all()
       for m in models:
          print(m.name)
@@ -56,7 +56,8 @@ def main(argv):
 
 #parse model
 
-#TODO
+#TODO openPonk fromat parsing: types and properties
+#TODO git connector
 
 
 

@@ -34,14 +34,20 @@ class Model:
     def get_namespaces(self):
         self.namespaces = etree.parse(self.model_file).getroot().nsmap
 
-    def parse_types(self):
+
+    def parse_types(self, format_class):
+        #EA format './/*[@base_Class]'
         class_types = self.model.findall('.//*[@base_Class]', self.namespaces)
+        attrib_name = 'base_Class'
         #print("here")
+        if format_class == 'openPonk':
+            class_types = etree.parse(self.model_file).getroot().findall('.//*[@base_Element]', self.namespaces)
+            attrib_name = 'base_Element'
         for t in class_types:
             name = re.sub(r"\{.*\}","", t.tag)
             #print(name, t.attrib['base_Class'])
             #self.class_types.append(ClassType(t.attrib['base_Class'], name))
-            self.class_types[t.attrib['base_Class']] = name
+            self.class_types[t.attrib[attrib_name]] = name
 
         #association types
         association_types = self.model.findall('.//*[@base_Association]', self.namespaces)
@@ -51,6 +57,9 @@ class Model:
             #print(name, t.attrib['base_Association'])
 
             #self.association_types.append(AssociationType(t.attrib['base_Association'], name))
+
+
+
 
     def get_id(self):
         packagedElement = self.model.find('./packagedElement', self.namespaces)
@@ -69,7 +78,8 @@ class Model:
         self.parse_classes()
         self.parse_associations()
         self.parse_generalization_sets()
-        self.parse_types()
+        self.parse_types('EA')
+        self.parse_types('openPonk')
 
 
     def parse_generalization_sets(self):
@@ -168,23 +178,48 @@ class Model:
         return association
 
     def parse_ownedEnds(self, a):
+        format = 'EA'
         dest_prop = {}
         src_prop = {}
+        if 'memberEnd' in a.attrib:
+            memberEnds = a.attrib['memberEnd'].split()
+            if memberEnds:
+                #print(memberEnds)
+                format = 'openPonk'
+
+
         ownedEnds = a.findall('ownedEnd', self.namespaces)
+
         for o in ownedEnds:
             #properties to find
             lval = o.find('lowerValue', self.namespaces)
             uval = o.find('upperValue', self.namespaces)
-            if "dst" in (o.attrib["{" + self.namespaces['xmi'] + "}id"]):
-                if lval is not None:
-                    dest_prop["lowerValue"] = lval.attrib["value"]
-                if uval is not None:
-                    dest_prop["upperValue"] = uval.attrib["value"]
-            elif "src" in (o.attrib["{" + self.namespaces['xmi'] + "}id"]):
-                if lval is not None:
-                    src_prop["lowerValue"] = lval.attrib["value"]
-                if uval is not None:
-                    src_prop["upperValue"] = uval.attrib["value"]
+            if format == 'openPonk':
+                if memberEnds[1] == (o.attrib["{" + self.namespaces['xmi'] + "}id"]):
+                    if lval is not None:
+                        if 'value' in lval.attrib:
+                            dest_prop["lowerValue"] = lval.attrib["value"]
+                    if uval is not None:
+                        if 'value' in uval.attrib:
+                            dest_prop["upperValue"] = uval.attrib["value"]
+                elif memberEnds[0] == (o.attrib["{" + self.namespaces['xmi'] + "}id"]):
+                    if lval is not None:
+                        if 'value' in lval.attrib:
+                            src_prop["lowerValue"] = lval.attrib["value"]
+                    if uval is not None:
+                        if 'value' in uval.attrib:
+                            src_prop["upperValue"] = uval.attrib["value"]
+            else:
+                if "dst" in (o.attrib["{" + self.namespaces['xmi'] + "}id"]):
+                    if lval is not None:
+                        dest_prop["lowerValue"] = lval.attrib["value"]
+                    if uval is not None:
+                        dest_prop["upperValue"] = uval.attrib["value"]
+                elif "src" in (o.attrib["{" + self.namespaces['xmi'] + "}id"]):
+                    if lval is not None:
+                        src_prop["lowerValue"] = lval.attrib["value"]
+                    if uval is not None:
+                        src_prop["upperValue"] = uval.attrib["value"]
 
         return src_prop, dest_prop
 
