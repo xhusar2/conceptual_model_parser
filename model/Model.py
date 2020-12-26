@@ -4,88 +4,57 @@ from model.Association import Association
 from model.Generalization import Generalization
 from model.Attribute import Attribute
 from model.GeneralizationSet import GeneralizationSet
-
 import re
 
-import json
 
 class Model:
 
-    namespaces = {'xmi': 'http://www.omg.org/spec/XMI/20110701',#'http://schema.omg.org/spec/XMI/2.1',
-                  'uml': 'http://www.omg.org/spec/UML/20110701'}#'http://schema.omg.org/spec/UML/2.1'}
-    type_attrib = "{" + namespaces['xmi'] + "}type"
-    #type_value_generalization = "uml:Generalization"
-    #type_value_association = "uml:Association"
-
-    def __init__(self, name, model_file):
-        self.name = name
-        #use package as model id
+    def __init__(self, model_file):
         self.id = ""
-        self.model_file = model_file
-        self.nodes = []
-        self.relations = []
+        self.classes = []
+        self.associations = []
+        self.generalizations = []
         self.generalization_sets = []
         self.class_types = {}
         self.association_types = {}
-        self.get_namespaces()
+        self.model_file = model_file
+        self.namespaces = self.get_namespaces()
         self.model = self.get_model()
-        self.parse_model()
+
+    def get_classes(self):
+        return self.classes
+
+    def get_associations(self):
+        return self.associations
+
+    def get_generalizations(self):
+        return self.generalizations
+
+    def get_gsets(self):
+        return self.generalization_sets
+
+    def get_types(self):
+        return self.class_types, self.association_types
 
     def get_namespaces(self):
-        self.namespaces = etree.parse(self.model_file).getroot().nsmap
+        return etree.parse(self.model_file).getroot().nsmap
 
+    # TODO xml verification
+    # def get_xml_schema(self):
+    #    with  open("./xmlSchemas/xsd_20071001.xsd", "r") as f:
+    #        xmlschema_doc = etree.parse(f)
+    #        return etree.XMLSchema(xmlschema_doc)
 
+    # parses association and class types
+    # implement in format specific model class
     def parse_types(self, format_class):
-        #EA format './/*[@base_Class]'
-        class_types = self.model.findall('.//*[@base_Class]', self.namespaces)
-        attrib_name = 'base_Class'
-        #print("here")
-        if format_class == 'openPonk':
-            class_types = etree.parse(self.model_file).getroot().findall('.//*[@base_Element]', self.namespaces)
-            attrib_name = 'base_Element'
-        for t in class_types:
-            name = re.sub(r"\{.*\}","", t.tag)
-            #print(name, t.attrib['base_Class'])
-            #self.class_types.append(ClassType(t.attrib['base_Class'], name))
-            self.class_types[t.attrib[attrib_name]] = name
-
-        #association types
-        association_types = self.model.findall('.//*[@base_Association]', self.namespaces)
-        for t in association_types:
-            name = re.sub(r"\{.*\}","", t.tag)
-            self.association_types[t.attrib['base_Association']] = name
-            #print(name, t.attrib['base_Association'])
-
-            #self.association_types.append(AssociationType(t.attrib['base_Association'], name))
-
-
-
-
-    def get_id(self):
-        packagedElement = self.model.find('./packagedElement', self.namespaces)
-        if packagedElement is not None:
-        #print(packagedElement)
-        #print(packagedElement.attrib)
-            return packagedElement.attrib['{' + self.namespaces['xmi'] + '}' + 'id']
-        id_attrib = '{' + self.namespaces['xmi'] + '}' + ':id'
-        if id_attrib in self.model.attrib:
-            return self.model.attrib[id_attrib]
-        return ""
-
-
-    def parse_model(self):
-        self.id = self.get_id()
-        self.parse_classes()
-        self.parse_associations()
-        self.parse_generalization_sets()
-        self.parse_types('EA')
-        self.parse_types('openPonk')
-
+        pass
 
     def parse_generalization_sets(self):
         gsets = self.model.findall('.//packagedElement[@xmi:type="uml:GeneralizationSet"]', self.namespaces)
         for g in gsets:
             self.parse_gset(g)
+        return self.generalization_sets
 
     def parse_gset(self, gs):
         gs_id = gs.attrib["{" + self.namespaces['xmi'] + "}" + "id"]
@@ -109,17 +78,18 @@ class Model:
 
     def parse_class(self, c):
         parsed_attributes = self.parse_attributes(c)
-        #new node
+        # new node
         node_id = c.attrib["{" + self.namespaces['xmi'] + "}" + "id"]
         n = Node(c.attrib["name"], node_id, "uml:Class", parsed_attributes)
-        #print(n)
-        self.nodes.append(n)
-        #parse sub classes, if present
+        # print(n)
+        self.classes.append(n)
+        # parse sub classes, if present
         nestedClassifiers = c.findall('nestedClassifier', namespaces=self.namespaces)
         for nc in nestedClassifiers:
-            if self.type_attrib in nc.attrib and nc.attrib[self.type_attrib] == "uml:Class":
+            if "{" + self.namespaces['xmi'] + "}type" in nc.attrib and nc.attrib[
+                "{" + self.namespaces['xmi'] + "}type"] == "uml:Class":
                 self.parse_class(nc)
-        #parse generalization, if present
+        # parse generalization, if present
         generalization = c.find('generalization', namespaces=self.namespaces)
         if generalization is not None:
             self.parse_generalization(generalization, node_id)
@@ -128,100 +98,25 @@ class Model:
         result = []
         attributes = c.findall('ownedAttribute', self.namespaces)
         for a in attributes:
-            #attrib_id, value = self.parse_attribute(a)
-            #result[attrib_id] = value
+            # attrib_id, value = self.parse_attribute(a)
+            # result[attrib_id] = value
             result.append(self.parse_attribute(a))
         return result
 
     def parse_association(self, a):
-        model = self.get_model()
-        src_prop, dest_prop = self.parse_ownedEnds(a)
-        assoc_id = a.attrib["{" + self.namespaces['xmi'] + "}" + "id"]
-        name = ""
-        if "name" in a.attrib:
-            name = a.attrib["name"]
+        # parses association based on specific model format, implemented in format specific model class
+        pass
 
-        # memberends
-        memberends = a.findall('memberEnd', self.namespaces)
+    def parse_owned_ends(self, a):
+        # parses association based on specific model format, implemented in format specific model class
+        pass
 
-        src_prop["id"] = None
-        dest_prop["id"] = None
-        aggregation = 'none'
-
-        #memberends openponk
-        if "memberEnd" in a.attrib:
-            format = "openPonk"
-            parts = a.attrib['memberEnd'].split(' ')
-            src_prop["id"] = self.find_ref_element(model, parts[0], format)
-            dest_prop["id"] = self.find_ref_element(model, parts[1], format)
-            aggregation = "open_ponk_format"
-
-
-        for m in memberends:
-            format = "EA"
-            idref = m.attrib["{" + self.namespaces['xmi'] + "}" + "idref"]
-            if aggregation != "none":
-                aggregation = model.xpath('.//*[@xmi:id="' + idref + '"]/@aggregation', namespaces=self.namespaces)[0]
-            if 'src' in idref:
-                src_prop["id"] = self.find_ref_element(model, idref, format)
-            if 'dst' in idref:
-                dest_prop["id"] = self.find_ref_element(model, idref, format)
-                #print(dst)
-        association = Association(assoc_id, name, src_prop, dest_prop)
-
-        if aggregation != "none":
-            association.relation_type = aggregation
-        else:
-            association.relation_type = "aggregation"
-        #print(association)
-        self.relations.append(association)
-        return association
-
-    def parse_ownedEnds(self, a):
-        format = 'EA'
-        dest_prop = {}
-        src_prop = {}
-        if 'memberEnd' in a.attrib:
-            memberEnds = a.attrib['memberEnd'].split()
-            if memberEnds:
-                #print(memberEnds)
-                format = 'openPonk'
-
-
-        ownedEnds = a.findall('ownedEnd', self.namespaces)
-
-        for o in ownedEnds:
-            #properties to find
-            lval = o.find('lowerValue', self.namespaces)
-            uval = o.find('upperValue', self.namespaces)
-            if format == 'openPonk':
-                if memberEnds[1] == (o.attrib["{" + self.namespaces['xmi'] + "}id"]):
-                    if lval is not None:
-                        if 'value' in lval.attrib:
-                            dest_prop["lowerValue"] = lval.attrib["value"]
-                    if uval is not None:
-                        if 'value' in uval.attrib:
-                            dest_prop["upperValue"] = uval.attrib["value"]
-                elif memberEnds[0] == (o.attrib["{" + self.namespaces['xmi'] + "}id"]):
-                    if lval is not None:
-                        if 'value' in lval.attrib:
-                            src_prop["lowerValue"] = lval.attrib["value"]
-                    if uval is not None:
-                        if 'value' in uval.attrib:
-                            src_prop["upperValue"] = uval.attrib["value"]
-            else:
-                if "dst" in (o.attrib["{" + self.namespaces['xmi'] + "}id"]):
-                    if lval is not None:
-                        dest_prop["lowerValue"] = lval.attrib["value"]
-                    if uval is not None:
-                        dest_prop["upperValue"] = uval.attrib["value"]
-                elif "src" in (o.attrib["{" + self.namespaces['xmi'] + "}id"]):
-                    if lval is not None:
-                        src_prop["lowerValue"] = lval.attrib["value"]
-                    if uval is not None:
-                        src_prop["upperValue"] = uval.attrib["value"]
-
-        return src_prop, dest_prop
+    def parse_model(self):
+        self.get_model_id()
+        self.parse_classes()
+        self.parse_associations()
+        self.parse_generalization_sets()
+        self.parse_types()
 
     def parse_generalization(self, generalization, node_id):
         generalization_id = generalization.attrib["{" + self.namespaces['xmi'] + "}" + "id"]
@@ -229,7 +124,7 @@ class Model:
         src = generalization.attrib["general"]
         dest = node_id
         r = Generalization(generalization_id, name, src, dest)
-        self.relations.append(r)
+        self.generalizations.append(r)
         return r
 
     def parse_attribute(self, attribute):
@@ -238,9 +133,8 @@ class Model:
         if "name" in attribute.attrib:
             name = attribute.attrib["name"]
         a = Attribute(attrib_id, name)
-        #print(json.dumps(a.__dict__))
-        return a #attrib_id, a
-    
+        return a
+
     def get_model(self):
         return etree.parse(self.model_file).find('uml:Model', self.namespaces)
 
@@ -251,21 +145,5 @@ class Model:
         for a in associations:
             self.parse_association(a)
 
-
-    def find_ref_element(self, model, idref, format):
-        if format == "EA":
-            xpath = './/*[@xmi:id="' + idref + '"]/type/@xmi:idref'
-            ref_element = model.xpath(xpath, namespaces=self.namespaces)[0]
-            return ref_element
-        if format == "openPonk":
-            xpath = './/*[@xmi:id="' + idref + '"]/@type'
-            ref_element = model.xpath(xpath, namespaces=self.namespaces)[0]
-            return ref_element
-
-
-
-
-
-
-
-
+    def find_ref_element(self, model, id_ref):
+        pass
