@@ -1,4 +1,5 @@
 from model.Association import Association
+from model.AssociationNode import AssociationNode
 from model.Model import Model
 import re
 
@@ -77,23 +78,37 @@ class ModelEnterpriseArchitect(Model):
         assoc_id = a.attrib["{" + self.namespaces['xmi'] + "}" + "id"]
         name = a.attrib["name"] if "name" in a.attrib else ""
 
-        # memberends
-        member_ends = a.findall('memberEnd', self.namespaces)
-
         src_prop["id"] = None
         dest_prop["id"] = None
         aggregation = 'none'
 
-        for m in member_ends:
-            id_ref = m.attrib["{" + self.namespaces['xmi'] + "}" + "idref"]
-            if aggregation != "none":
-                aggregation = model.xpath('.//*[@xmi:id="' + id_ref + '"]/@aggregation', namespaces=self.namespaces)[0]
-            if 'src' in id_ref:
-                src_prop["id"] = self.find_ref_element(model, id_ref)
-            if 'dst' in id_ref:
-                dest_prop["id"] = self.find_ref_element(model, id_ref)
-        association = Association(assoc_id, name, src_prop, dest_prop)
-        association.relation_type = aggregation if aggregation != "none" else "aggregation"
+        # memberends
+        member_ends = a.findall('memberEnd', self.namespaces)
+        if len(member_ends) > 2:
+            print('need to create association node')
+            association_node = AssociationNode(assoc_id+"association_node")
+            self.association_nodes.append(association_node)
+            for m in member_ends:
+                id_ref = m.attrib["{" + self.namespaces['xmi'] + "}" + "idref"]
+                if aggregation != "none":
+                    aggregation = model.xpath('.//*[@xmi:id="' + id_ref + '"]/@aggregation', namespaces=self.namespaces)[0]
+                dest_prop['id'] = self.find_ref_element(model, id_ref)
+                src_prop['id'] = association_node.node_id
+                association = Association(assoc_id, name, src_prop, dest_prop)
+                association.relation_type = aggregation if aggregation != "none" else "aggregation"
+                self.associations.append(association)
+        else:
+            for m in member_ends:
+                id_ref = m.attrib["{" + self.namespaces['xmi'] + "}" + "idref"]
+                if aggregation != "none":
+                    aggregation = model.xpath('.//*[@xmi:id="' + id_ref + '"]/@aggregation', namespaces=self.namespaces)[0]
+                if 'src' in id_ref:
+                    src_prop["id"] = self.find_ref_element(model, id_ref)
+                if 'dst' in id_ref:
+                    dest_prop["id"] = self.find_ref_element(model, id_ref)
 
-        self.associations.append(association)
-        return association
+            association = Association(assoc_id, name, src_prop, dest_prop)
+            association.relation_type = aggregation if aggregation != "none" else "aggregation"
+
+            self.associations.append(association)
+        return True

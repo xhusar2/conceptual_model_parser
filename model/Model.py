@@ -15,6 +15,7 @@ class Model:
         self.associations = []
         self.generalizations = []
         self.generalization_sets = []
+        self.association_nodes = []
         self.class_types = {}
         self.association_types = {}
         self.model_file = model_file
@@ -26,6 +27,9 @@ class Model:
 
     def get_associations(self):
         return self.associations
+
+    def get_association_nodes(self):
+        return self.association_nodes
 
     def get_generalizations(self):
         return self.generalizations

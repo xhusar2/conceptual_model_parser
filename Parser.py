@@ -43,7 +43,8 @@ def get_namespaces(file_name):
 def parse_model(model):
     model.parse_model()
     c_types, a_types = model.get_types()
-    parsed_model = ModelParsed(model.get_model_id(), model.get_classes(), model.get_associations()
+    parsed_model = ModelParsed(model.get_model_id(), model.get_classes(), model.get_associations(),
+                               model.get_association_nodes()
                                , model.get_generalizations(), model.get_gsets(), c_types, a_types)
     return parsed_model
 

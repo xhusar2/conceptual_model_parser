@@ -3,10 +3,11 @@
 
 
 class ModelParsed:
-    def __init__(self, model_id, classes, associations, generalizations, generalization_sets, c_types, a_types):
+    def __init__(self, model_id, classes, associations, association_nodes, generalizations, generalization_sets, c_types, a_types):
         self.id = model_id
         self.classes = classes
         self.associations = associations
+        self.association_nodes = association_nodes
         self.generalizations = generalizations
         self.generalization_sets = generalization_sets
         self.class_types = c_types

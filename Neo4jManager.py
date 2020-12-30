@@ -17,6 +17,11 @@ class Neo4jManager:
     @staticmethod
     def add_to_db(model):
         nodes = {}
+        for n in model.association_nodes:
+            node = AssociationNode(model_id=model.id, node_id=n.node_id)
+            nodes[n.node_id] = node
+            node.save()
+
         for c in model.classes:
             class_type = ""
             if c.id in model.class_types:
@@ -93,6 +98,11 @@ class Attribute(StructuredNode):
     name = StringProperty()
     attrib_type = StringProperty()
 
+
+class AssociationNode(StructuredNode):
+    model_id = StringProperty()
+    node_id = UniqueIdProperty()
+    association = Relationship("Class", "association", model=AssociationRel)
 
 class Class(StructuredNode):
     model_id = StringProperty()
