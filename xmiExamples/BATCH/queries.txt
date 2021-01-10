@@ -17,7 +17,6 @@ MATCH (n) WHERE n.model_id = "EAPK_D0D4BF34_3D4D_4a49_9AAE_BD1A1F4FAD4D" return 
 #find based on model id - EA custom example
 MATCH (n) WHERE n.model_id = "EAPK_525F090D_4577_4e7b_AB0E_1AB0A323DEC0" return n
 
-
 #find specific connections
 MATCH (n)-[]-(m) WHERE n.model_id = "e5daad8d-1571-0d00-b95d-5b5f0ea891c5" AND n.name ="Referencni obdobi" and m.name = "Mzda" return n,m
 

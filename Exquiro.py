@@ -3,8 +3,9 @@ import getopt
 import os
 import sys
 
+from parsers.ParserFactory import ParserFactory
 from Neo4jManager import Neo4jManager
-from Parser import parse_file
+from XMIFile import XMIFile
 
 
 def parse_args(argv):
@@ -36,8 +37,17 @@ def main(argv):
     if input_file != '':
         print('Input file is ', input_file)
         # parse file
-        parsed_m = parse_file(input_file)
-        neo4j_manager.add_to_db(parsed_m)
+        xmi_file = XMIFile(input_file)
+        diagrams = xmi_file.get_diagrams()
+        for diagram in diagrams:
+            parser = ParserFactory.get_diagram_dependent_parser(diagram)
+            parsed_models = parser.parse_file(input_file, xmi_file.get_format())
+            for parsed_model in parsed_models:
+                try:
+                    # print("model name:", parsed_model.id)
+                    neo4j_manager.add_to_db(parsed_model)
+                except:
+                    print(f'could not parse model from file {input_file}')
 
     elif directory != '':
         path = os.walk(directory)
@@ -45,20 +55,20 @@ def main(argv):
             for file in files:
                 if str(file).endswith('.xml') or str(file).endswith('.xmi'):
                     file_path = os.path.join(directory, file)
-                    parsed_model = parse_file(file_path)
-                    try:
-                        print("model name:", parsed_model.id)
-                        neo4j_manager.add_to_db(parsed_model)
-                    except:
-                        print(f'could not parse model from file {file}')
+                    xmi_file = XMIFile(file_path)
+                    diagrams = xmi_file.get_diagrams()
+                    for diagram in diagrams:
+                        parser = ParserFactory.get_diagram_dependent_parser(diagram)
+                        parsed_models = parser.parse_file(file_path, xmi_file.get_format())
+                        for parsed_model in parsed_models:
+                            try:
+                                #print("model name:", parsed_model.id)
+                                neo4j_manager.add_to_db(parsed_model)
+                            except:
+                                print(f'could not parse model from file {file}')
 
 
-# check if it is XMI format
 
-# parse model
-
-# TODO openPonk format parsing: types and properties
-# TODO git connector
 
 if __name__ == "__main__":
     main(sys.argv[1:])

@@ -1,9 +1,9 @@
 from lxml import etree
-from model.Node import Node
-from model.Association import Association
-from model.Generalization import Generalization
-from model.Attribute import Attribute
-from model.GeneralizationSet import GeneralizationSet
+from models.classDiagram.Node import Node
+from models.classDiagram.Association import Association
+from models.classDiagram.Generalization import Generalization
+from models.classDiagram.Attribute import Attribute
+from models.classDiagram.GeneralizationSet import GeneralizationSet
 import re
 
 

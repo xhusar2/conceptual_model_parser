@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from model.Relation import Relation
+from models.classDiagram.Relation import Relation
 
 
 class Association(Relation):

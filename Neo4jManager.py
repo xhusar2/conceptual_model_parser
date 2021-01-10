@@ -14,6 +14,7 @@ class Neo4jManager:
         neo_db.cypher_query("MATCH ()-[r]-() DETACH DELETE r")
         neo_db.cypher_query("MATCH (n) DETACH DELETE n")
 
+#TODO now only accepts class model
     @staticmethod
     def add_to_db(model):
         nodes = {}

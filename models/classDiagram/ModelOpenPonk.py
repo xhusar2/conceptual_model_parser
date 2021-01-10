@@ -1,5 +1,5 @@
-from model.Association import Association
-from model.Model import Model
+from models.classDiagram.Association import Association
+from models.classDiagram.Model import Model
 import re
 from lxml import etree
 

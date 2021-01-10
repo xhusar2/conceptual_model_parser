@@ -1,6 +1,6 @@
-from model.Association import Association
-from model.AssociationNode import AssociationNode
-from model.Model import Model
+from models.classDiagram.Association import Association
+from models.classDiagram.AssociationNode import AssociationNode
+from models.classDiagram.Model import Model
 import re
 
 

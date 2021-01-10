@@ -1,4 +1,4 @@
-from model.Relation import Relation
+from models.classDiagram.Relation import Relation
 
 
 class Generalization(Relation):
