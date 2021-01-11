@@ -1,10 +1,10 @@
 from models.classDiagram.Association import Association
 from models.classDiagram.AssociationNode import AssociationNode
-from models.classDiagram.Model import Model
+from models.classDiagram.ClsDiagramModel import ClsDiagramModel
 import re
 
 
-class ModelEnterpriseArchitect(Model):
+class ClsDiagramModelEnterpriseArchitect(ClsDiagramModel):
 
     def __init__(self, file_name):
         super().__init__(file_name)

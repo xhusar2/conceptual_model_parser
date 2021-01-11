@@ -1,10 +1,10 @@
 from models.classDiagram.Association import Association
-from models.classDiagram.Model import Model
+from models.classDiagram.ClsDiagramModel import ClsDiagramModel
 import re
 from lxml import etree
 
 
-class ModelOpenPonk(Model):
+class ClsDiagramModelOpenPonk(ClsDiagramModel):
 
     def __init__(self, file_name):
         super().__init__(file_name)

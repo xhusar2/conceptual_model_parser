@@ -7,6 +7,7 @@ from parsers.ParserFactory import ParserFactory
 from Neo4jManager import Neo4jManager
 from XMIFile import XMIFile
 
+from parsers.EnterpriceArchitectParsers.EAClsDiagramParser import EaClsDiagramParser
 
 def parse_args(argv):
     input_file = ''
@@ -33,6 +34,8 @@ def main(argv):
     neo4j_manager = Neo4jManager()
     # delete earlier graphs
     neo4j_manager.delete_all()
+    factory = ParserFactory()
+    factory.register_parser('enterprise_architect', 'class_diagram', EaClsDiagramParser)
 
     if input_file != '':
         print('Input file is ', input_file)
@@ -40,8 +43,8 @@ def main(argv):
         xmi_file = XMIFile(input_file)
         diagrams = xmi_file.get_diagrams()
         for diagram in diagrams:
-            parser = ParserFactory.get_diagram_dependent_parser(diagram)
-            parsed_models = parser.parse_file(input_file, xmi_file.get_format())
+            parser = factory.get_parser(diagram)
+            parsed_models = parser.parse_file(input_file)
             for parsed_model in parsed_models:
                 try:
                     # print("model name:", parsed_model.id)
@@ -57,15 +60,18 @@ def main(argv):
                     file_path = os.path.join(directory, file)
                     xmi_file = XMIFile(file_path)
                     diagrams = xmi_file.get_diagrams()
+
                     for diagram in diagrams:
-                        parser = ParserFactory.get_diagram_dependent_parser(diagram)
-                        parsed_models = parser.parse_file(file_path, xmi_file.get_format())
-                        for parsed_model in parsed_models:
-                            try:
-                                #print("model name:", parsed_model.id)
-                                neo4j_manager.add_to_db(parsed_model)
-                            except:
-                                print(f'could not parse model from file {file}')
+                        #try:
+                        parser = factory.get_parser(xmi_file.get_format(), diagram)
+                        parsed_model = parser.parse_file(file_path)
+
+                        print("model name:", parsed_model.id)
+                        neo4j_manager.add_to_db(parsed_model)
+                        #except ValueError:
+                        #    print(f'could not parse model from file {file}: {ValueError}')
+                        #except:
+                         #   print(f'could not parse model from file {file}')
 
 
 

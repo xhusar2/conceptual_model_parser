@@ -14,7 +14,8 @@ class Neo4jManager:
         neo_db.cypher_query("MATCH ()-[r]-() DETACH DELETE r")
         neo_db.cypher_query("MATCH (n) DETACH DELETE n")
 
-#TODO now only accepts class model
+    #TODO now only accepts class model
+    # refator to accept models with nodes and relationships
     @staticmethod
     def add_to_db(model):
         nodes = {}
@@ -59,7 +60,7 @@ class Neo4jManager:
                 # rel.dest_cardinality = r.dest_cardinality
                 rel.save()
         for generalization in model.generalizations:
-            if generalization.src is not None:
+            if generalization.dest is not None and generalization.src is not None:
                 rel = nodes[generalization.dest].generalization.connect(nodes[generalization.src])
                 rel._type = generalization.relation_type
                 rel.src_properties = []
