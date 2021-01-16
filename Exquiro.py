@@ -8,6 +8,7 @@ from Neo4jManager import Neo4jManager
 from XMIFile import XMIFile
 
 from parsers.EnterpriceArchitectParsers.EAClsDiagramParser import EaClsDiagramParser
+from parsers.OpenponkParsers.OpenponkClsDiagramParser import OpenponkClsDiagramParser
 
 def parse_args(argv):
     input_file = ''
@@ -36,6 +37,7 @@ def main(argv):
     neo4j_manager.delete_all()
     factory = ParserFactory()
     factory.register_parser('enterprise_architect', 'class_diagram', EaClsDiagramParser)
+    factory.register_parser('open_ponk', 'class_diagram', OpenponkClsDiagramParser)
 
     if input_file != '':
         print('Input file is ', input_file)
@@ -63,10 +65,11 @@ def main(argv):
 
                     for diagram in diagrams:
                         #try:
+                        print(file)
                         parser = factory.get_parser(xmi_file.get_format(), diagram)
                         parsed_model = parser.parse_file(file_path)
 
-                        print("model name:", parsed_model.id)
+                        #print("model name:",parsed_model.id)
                         neo4j_manager.add_to_db(parsed_model)
                         #except ValueError:
                         #    print(f'could not parse model from file {file}: {ValueError}')

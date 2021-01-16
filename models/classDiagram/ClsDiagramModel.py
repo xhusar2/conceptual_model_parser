@@ -1,26 +1,7 @@
 from lxml import etree
-from models.classDiagram.Node import Node
-from models.classDiagram.Association import Association
-from models.classDiagram.Generalization import Generalization
-from models.classDiagram.Attribute import Attribute
-from models.classDiagram.GeneralizationSet import GeneralizationSet
-import re
 
 
 class ClsDiagramModel:
-    #delete
-    def __init__(self, model_file):
-        self.id = ""
-        self.classes = []
-        self.associations = []
-        self.generalizations = []
-        self.generalization_sets = []
-        self.association_nodes = []
-        self.class_types = {}
-        self.association_types = {}
-        self.model_file = model_file
-        self.namespaces = self.get_namespaces()
-        self.model = self.get_model()
 
     def __init__(self, model_id, classes, associations, association_nodes, generalizations, generalization_sets, c_types, a_types):
         self.id = model_id
@@ -59,6 +40,4 @@ class ClsDiagramModel:
     #        xmlschema_doc = etree.parse(f)
     #        return etree.XMLSchema(xmlschema_doc)
 
-    # parses association and class types
-    # implement in format specific model class
 
