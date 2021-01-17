@@ -70,7 +70,8 @@ def main(argv):
                         parsed_model = parser.parse_file(file_path)
 
                         #print("model name:",parsed_model.id)
-                        neo4j_manager.add_to_db(parsed_model)
+                        #neo4j_manager.add_to_db(parsed_model)
+                        neo4j_manager.add_model(parsed_model)
                         #except ValueError:
                         #    print(f'could not parse model from file {file}: {ValueError}')
                         #except:

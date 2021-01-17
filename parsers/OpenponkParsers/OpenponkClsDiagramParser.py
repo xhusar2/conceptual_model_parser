@@ -1,5 +1,6 @@
+from models.classDiagram.ClsDiagramModel import ClsDiagramModel
 from parsers.ClsDiagramParser import ClsDiagramParser
-from models.classDiagram.Node import Node
+from models.classDiagram.ClassNode import ClassNode
 from models.classDiagram.Association import Association
 from models.classDiagram.AssociationNode import AssociationNode
 from models.classDiagram.GeneralizationSet import GeneralizationSet
@@ -7,14 +8,31 @@ from models.classDiagram.Generalization import Generalization
 from models.classDiagram.Attribute import Attribute
 import re
 
+
 class OpenponkClsDiagramParser(ClsDiagramParser):
+
+
 
     # Input: xmi/xml file
     # Output parsed model ready to be stored to Neo4j
     def parse_file(self, file_name):
         namespaces = self.get_namespaces(file_name)
         model = self.get_model(file_name, namespaces)
-        return self.parse_model(model, namespaces)
+        root = self.get_root(file_name)
+        return self.parse_model(model, root, namespaces)
+
+    def parse_model(self, model, root, namespaces):
+        m_id = self.parse_id(model, namespaces)
+        m_classes = self.parse_classes(model, namespaces)
+        m_associations, m_association_nodes = self.parse_associations(model, namespaces)
+        m_generalizations = self.parse_generalizations(model, namespaces)
+        c_types, a_types = self.parse_types(model, root, namespaces)
+        m_gsets = self.parse_generalization_sets(model, namespaces)
+        # TODO return neo4j model consisting from nodes and relations only
+        #  implement in ClsDiagramModel
+        return ClsDiagramModel(m_id, m_classes, m_associations, m_association_nodes
+                               , m_generalizations, m_gsets, c_types, a_types)
+
 
     def parse_id(self, model, namespaces):
         attrib_id = "{" + namespaces['xmi'] + "}" + "id"
@@ -33,7 +51,7 @@ class OpenponkClsDiagramParser(ClsDiagramParser):
         parsed_attributes = self.parse_attributes(c, namespaces)
         # new node
         node_id = c.attrib["{" + namespaces['xmi'] + "}" + "id"]
-        n = Node(c.attrib["name"], node_id, "uml:Class", parsed_attributes)
+        n = ClassNode(c.attrib["name"], node_id, "uml:Class", parsed_attributes)
         classes.append(n)
         # parse sub classes, if present
         nested_classifiers = c.findall('nestedClassifier', namespaces=namespaces)
@@ -114,12 +132,12 @@ class OpenponkClsDiagramParser(ClsDiagramParser):
             associations.append(association)
         return associations, association_nodes
 
-    def parse_types(self, model, namespaces):
+    def parse_types(self, model, root, namespaces):
         c_types = {}
         a_types = {}
 
         # class types
-        class_types = model.findall('.//*[@base_Element]', namespaces)
+        class_types = root.findall('.//*[@base_Element]', namespaces)
         attrib_name = 'base_Element'
         for t in class_types:
             name = re.sub(r"{.*\}", "", t.tag)
@@ -127,11 +145,11 @@ class OpenponkClsDiagramParser(ClsDiagramParser):
             c_types[t.attrib[attrib_name]] = name
 
         # association types
-        association_types = model.findall('.//*[@base_Association]', namespaces)
+        association_types = root.findall('.//*[@base_Element]', namespaces)
         for t in association_types:
             name = re.sub(r"{.*\}", "", t.tag)
             # self.association_types[t.attrib['base_Association']] = name
-            a_types[t.attrib['base_Association']] = name
+            a_types[t.attrib['base_Element']] = name
         return c_types, a_types
 
     def parse_generalization_sets(self, model, namespaces):

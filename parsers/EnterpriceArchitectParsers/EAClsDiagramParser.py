@@ -1,5 +1,5 @@
 from parsers.ClsDiagramParser import ClsDiagramParser
-from models.classDiagram.Node import Node
+from models.classDiagram.ClassNode import ClassNode
 from models.classDiagram.Association import Association
 from models.classDiagram.AssociationNode import AssociationNode
 from models.classDiagram.GeneralizationSet import GeneralizationSet
@@ -37,7 +37,7 @@ class EaClsDiagramParser(ClsDiagramParser):
         parsed_attributes = self.parse_attributes(c, namespaces)
         # new node
         node_id = c.attrib["{" + namespaces['xmi'] + "}" + "id"]
-        n = Node(c.attrib["name"], node_id, "uml:Class", parsed_attributes)
+        n = ClassNode(c.attrib["name"], node_id, "uml:Class", parsed_attributes)
         classes.append(n)
         # parse sub classes, if present
         nested_classifiers = c.findall('nestedClassifier', namespaces=namespaces)

@@ -68,6 +68,10 @@ class ClsDiagramParser:
     def get_namespaces(self, file_name):
         return etree.parse(file_name).getroot().nsmap
 
+    def get_root(self, file_name):
+        self.root = etree.parse(file_name).getroot()
+        return self.root
+
     def parse_associations(self, model, namespace):
         pass
 

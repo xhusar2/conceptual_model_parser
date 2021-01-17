@@ -1,5 +1,5 @@
 
-class Node:
+class ClassNode:
     name = ""
     id = ""
     node_class = ""
