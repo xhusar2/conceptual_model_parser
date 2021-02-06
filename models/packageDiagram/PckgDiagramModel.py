@@ -22,9 +22,26 @@ class PackageDiagramModel(Model):
             nodes[node._id] = node
 
         for r in self.relations:
-            relations.append((r.src, r.dest, r.id, r.relation_type))
+            if r.dest is not None and r.src is not None:
+                rel_source = r.dest
+                rel_dest = r.src
+                rel_props = {
+                    '_type': r.relation_type,
+                    'src_properties': [],
+                    'dest_properties': [],
+                    'dependency_id': r.id
+                }
+                rel_attrib = 'dependency'
+                relations.append((rel_source, rel_dest, rel_props, rel_attrib))
 
         return nodes, relations
+
+
+class DependencyRel(StructuredRel):
+    dependency_id = StringProperty()
+    _type = StringProperty()
+    src_properties = JSONProperty()
+    dest_properties = JSONProperty()
 
 
 class Package(StructuredNode):
@@ -32,4 +49,4 @@ class Package(StructuredNode):
     _id = UniqueIdProperty()
     name = StringProperty()
     type = StringProperty()
-
+    dependency = Relationship("Package", "dependency", model=DependencyRel)
