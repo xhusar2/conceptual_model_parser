@@ -3,7 +3,7 @@ from model.Model import ClassDiagramModel
 
 
 class TestModelParsing(unittest.TestCase):
-    input_file = "../xmiExamples/EA_Class_basic.xml"
+    input_file = "../xmiExamples/ea_class_basic.xml"
 
     def test_parse_simple_model(self):
         with open(self.input_file, 'r') as f:

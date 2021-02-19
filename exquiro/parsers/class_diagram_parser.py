@@ -1,5 +1,5 @@
-from models.classDiagram.ClsDiagramModel import ClsDiagramModel
 from lxml import etree
+from ..models.class_diagram.class_diagram_model import ClsDiagramModel
 
 class ClsDiagramParser:
     """ Parser should take file with XMI model and return model ready to be inserted to Neo4j (nodes and

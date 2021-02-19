@@ -1,10 +1,11 @@
-from parsers.ClsDiagramParser import ClsDiagramParser
-from models.classDiagram.ClassNode import ClassNode
-from models.classDiagram.Association import Association
-from models.classDiagram.AssociationNode import AssociationNode
-from models.classDiagram.GeneralizationSet import GeneralizationSet
-from models.classDiagram.Generalization import Generalization
-from models.classDiagram.Attribute import Attribute
+from ..class_diagram_parser import ClsDiagramParser
+from ...models.class_diagram.attribute import Attribute
+from ...models.class_diagram.association import Association
+from ...models.class_diagram.association_node import AssociationNode
+from ...models.class_diagram.generalization_set import GeneralizationSet
+from ...models.class_diagram.generalization import Generalization
+from ...models.class_diagram.attribute import Attribute
+from ...models.class_diagram.class_node import ClassNode
 import re
 
 

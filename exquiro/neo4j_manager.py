@@ -6,7 +6,10 @@ config.DATABASE_URL = 'bolt://neo4j:password@localhost:7687'
 
 
 # this class represents Neo4j manager. It stores model to db, deletes models from db, executes queries
-class Neo4jManager:
+class Neo4jManager():
+
+    def __init__(self, DATABASE_URL):
+        config.DATABASE_URL = DATABASE_URL
 
     @staticmethod
     def delete_all():

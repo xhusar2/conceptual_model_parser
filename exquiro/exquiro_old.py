@@ -3,12 +3,12 @@ import getopt
 import os
 import sys
 
-from parsers.ParserFactory import ParserFactory
-from Neo4jManager import Neo4jManager
-from XMIFile import XMIFile
+from .parsers.parser_factory import ParserFactory
+from .neo4j_manager import Neo4jManager
+from .xmi_file import XMIFile
 
-from parsers.EnterpriceArchitectParsers.EAClsDiagramParser import EaClsDiagramParser
-from parsers.OpenponkParsers.OpenponkClsDiagramParser import OpenponkClsDiagramParser
+from .parsers.enterprise_architect.ea_class_diagram_parser import EaClsDiagramParser
+from .parsers.openponk.openpondk_class_diagram_parser import OpenponkClsDiagramParser
 
 def parse_args(argv):
     input_file = ''
