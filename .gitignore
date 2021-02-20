@@ -5,3 +5,6 @@ exquiro/tmp/*
 /exquiro/test.xml
 /exquiro/VP_test_XMI.xmi
 /exquiro/visual/*
+/config/
+/dist/
+/build/
