@@ -1,6 +1,4 @@
-from abc import ABC
-
-from ..Model import Model
+from ..model import Model
 from lxml import etree
 from neomodel import StructuredNode, StringProperty, ArrayProperty, Relationship, config, StructuredRel, JSONProperty,\
     UniqueIdProperty

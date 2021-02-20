@@ -41,6 +41,8 @@ class Exquiro():
                 self.neo4j_manager.add_model(parsed_model)
             except:
                 print(f'could not parse model from file {file_path}')
+                return False
+        return True
 
     def add_models_from_github(self, repo_url, owner="", token=""):
         xmi_files = []
@@ -54,7 +56,7 @@ def create_app():
     settings.read(neo4j_settings)
     neo4j_user = 'neo4j' # settings.get("NEO4J", "USERNAME")
     neo4j_password = 'password' # settings.get("NEO4J", "PASSWORD")
-    neo4j_url = 'localhost:7687'# settings.get("NEO4J", "DATABASE_URL")
+    neo4j_url = 'neo4j:7687'# settings.get("NEO4J", "DATABASE_URL")
     neo4j_cs = f'bolt://{neo4j_user}:{neo4j_password}@{neo4j_url}'
     # print(neo4j_cs)
     app = Exquiro(DATABASE_URL=neo4j_cs)

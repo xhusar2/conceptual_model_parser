@@ -1,0 +1,1 @@
+from .ea_class_diagram_parser import EaClsDiagramParser

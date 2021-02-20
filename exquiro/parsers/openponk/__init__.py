@@ -1,0 +1,1 @@
+from .openpondk_class_diagram_parser import OpenponkClsDiagramParser

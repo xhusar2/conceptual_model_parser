@@ -1,1 +1,7 @@
-/tmp/
+exquiro/tmp/*
+/exquiro/xmiExamples/*
+/exquiro/xmlSchemas/*
+/exquiro/query.py
+/exquiro/test.xml
+/exquiro/VP_test_XMI.xmi
+/exquiro/visual/*
