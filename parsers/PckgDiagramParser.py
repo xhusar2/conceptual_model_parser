@@ -11,16 +11,15 @@ class PckgDiagramParser:
 
     def parse_model(self, model, namespaces):
         m_id = self.parse_id(model, namespaces)
-        m_classes = self.parse_packages(model, namespaces)
+        m_nodes = self.parse_nodes(model, namespaces)
         m_relations = self.parse_relations(model, namespaces)
-        return PackageDiagramModel(m_id, m_classes, m_relations)
+        return PackageDiagramModel(m_id, m_nodes, m_relations)
+
+    def parse_nodes(self, model, namespaces):
+        pass
 
     def parse_relations(self, model, namespaces):
-        m_relations = self.parse_dependencies(model, namespaces)
-        m_relations.extend(self.parse_merges(model, namespaces))
-        m_relations.extend(self.parse_imports(model, namespaces))
-        m_relations.extend(self.parse_profiles(model, namespaces))
-        return m_relations
+        pass
 
     def parse_id(self, model, namespaces):
         pass
@@ -28,36 +27,35 @@ class PckgDiagramParser:
     def parse_packages(self, model, namespaces):
         pass
 
-    def parse_package(self, p, namespaces, packages):
+    def parse_package(self, package, namespaces, packages):
         pass
 
     def parse_dependencies(self, model, namespaces):
         pass
 
-    def parse_dependency(self, d, namespaces, dependencies):
+    def parse_dependency(self, dependency, namespaces, dependencies):
         pass
 
-    def parse_merges(self, model, namespaces):
+    def parse_merges(self, packages, namespaces):
         pass
 
     def parse_merge(self, package, namespaces, merges):
         pass
 
-    def parse_profiles(self, model, namespaces):
-        pass
-
-    def parse_profile(self, package, namespaces, profiles):
-        pass
-
-    def parse_imports(self, model, namespaces):
+    def parse_imports(self, packages, namespaces):
         pass
 
     def parse_import(self, package, namespaces, imports):
         pass
 
-    @staticmethod
-    def get_model(file_name, namespaces):
-        return etree.parse(file_name).find('uml:Model', namespaces)
+    def parse_member_packages(self, packages, namespaces):
+        pass
+
+    def parse_member_package(self, package, namespaces, members):
+        pass
+
+    def get_model(self, file_name, namespaces):
+        pass
 
     @staticmethod
     def get_namespaces(file_name):
