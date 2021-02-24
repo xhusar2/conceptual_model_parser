@@ -18,6 +18,7 @@ class EAPckgDiagramParser(PckgDiagramParser):
         m_relations.extend(self.parse_merges(packages, namespaces))
         m_relations.extend(self.parse_imports(packages, namespaces))
         m_relations.extend(self.parse_member_packages(packages, namespaces))
+        m_relations.extend(self.parse_usages(model, namespaces))
         return m_relations
 
     # TODO refactor
@@ -117,11 +118,25 @@ class EAPckgDiagramParser(PckgDiagramParser):
                 members.append(m_member)
         return
 
+    def parse_usages(self, model, namespaces):
+        m_usage = []
+        usages = model.findall('.//packagedElement[@xmi:type="uml:Usage"]', namespaces)
+        for usage in usages:
+            self.parse_usage(usage, namespaces, m_usage)
+        return m_usage
+
+    def parse_usage(self, usage, namespaces, usages):
+        usage_id = usage.attrib["{" + namespaces['xmi'] + "}" + "id"]
+        usage_source = usage.attrib["supplier"]
+        usage_target = usage.attrib["client"]
+        rel_type = "Usage"
+        usage_rel = PckgRelation(usage_id, usage_source, usage_target, rel_type)
+        usages.append(usage_rel)
+        return
+
     def get_model(self, file_name, namespaces):
         return etree.parse(file_name).getroot().find('uml:Model', namespaces)
 
     def get_packages(self, model, namespaces):
         packages = model.findall('.//packagedElement[@xmi:type="uml:Package"]', namespaces)
-        models = model.findall('.//packagedElement[@xmi:type="uml:Model"]', namespaces)
-        packages.extend(models)
         return packages

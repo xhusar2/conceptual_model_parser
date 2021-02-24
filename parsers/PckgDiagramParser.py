@@ -57,6 +57,12 @@ class PckgDiagramParser:
     def get_model(self, file_name, namespaces):
         pass
 
+    def parse_usages(self, packages, namespaces):
+        pass
+
+    def parse_usage(self, model, namespaces, usages):
+        pass
+
     @staticmethod
     def get_namespaces(file_name):
         return etree.parse(file_name).getroot().nsmap
