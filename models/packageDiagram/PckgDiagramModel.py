@@ -53,3 +53,4 @@ class Package(StructuredNode):
     PackageImport = Relationship("Package", "import", model=RelationModel)
     MemberOf = Relationship("Package", "memberOf", model=RelationModel)
     Usage = Relationship("Package", "use", model=RelationModel)
+    PackageAccess = Relationship("Package", "access", model=RelationModel)
