@@ -19,6 +19,8 @@ class XMIFile:
         namespaces = self.get_namespaces(self.file_path)
         # try find exporter (EA format)
         exporter = root.find('xmi:Documentation', namespaces)
+        if exporter is not None and 'exporter' in exporter.attrib and exporter.attrib["exporter"] == "Visual Paradigm":
+            return "visual_paradigm"
         if exporter is not None and 'exporter' in exporter.attrib:
             return "enterprise_architect"
         # openPonk format
