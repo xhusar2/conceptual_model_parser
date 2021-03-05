@@ -3,9 +3,11 @@ from lxml import etree
 from neomodel import StructuredNode, StringProperty, ArrayProperty, Relationship, config, StructuredRel, JSONProperty,\
     UniqueIdProperty
 
+
 class ClsDiagramModel(Model):
 
-    def __init__(self, model_id, classes, associations, association_nodes, generalizations, generalization_sets, c_types, a_types):
+    def __init__(self, model_id, classes, associations, association_nodes, association_classes,
+                 association_class_connections, generalizations, generalization_sets, c_types, a_types):
         self.id = model_id
         self.classes = classes
         self.associations = associations
@@ -14,6 +16,8 @@ class ClsDiagramModel(Model):
         self.generalization_sets = generalization_sets
         self.class_types = c_types
         self.association_types = a_types
+        self.association_classes = association_classes
+        self.association_class_connections = association_class_connections
 
     def get_classes(self):
         return self.classes
@@ -23,6 +27,9 @@ class ClsDiagramModel(Model):
 
     def get_association_nodes(self):
         return self.association_nodes
+
+    def get_association_classes(self):
+        return self.association_classes
 
     def get_generalizations(self):
         return self.generalizations
@@ -79,6 +86,17 @@ class ClsDiagramModel(Model):
                     }
                 rel_attrib = 'association'
                 relations.append((rel_source, rel_dest, rel_props, rel_attrib))
+
+        for ac in self.association_classes:
+            node = AssociationClass(model_id=self.id, _id=ac.node_id)
+            nodes[node._id] = node
+
+        for acc in self.association_class_connections:
+            if acc.src in nodes and acc.dest in nodes:
+                rel_source = acc.src
+                rel_dest = acc.dest
+                rel_attrib = 'association_class_connection'
+                relations.append((rel_source, rel_dest, {}, rel_attrib))
 
         for generalization in self.generalizations:
             if generalization.dest is not None and generalization.src is not None:
@@ -143,4 +161,9 @@ class Class(StructuredNode):
     association = Relationship("Class", "association", model=AssociationRel)
     attribute = Relationship("Attribute", "has")
 
-
+class AssociationClass(StructuredNode):
+    model_id = StringProperty()
+    _id = UniqueIdProperty()
+    name = StringProperty()
+    type = StringProperty()
+    association_class_connection = Relationship("Class", "connects")

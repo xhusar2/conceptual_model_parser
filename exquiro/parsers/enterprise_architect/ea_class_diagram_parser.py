@@ -6,6 +6,8 @@ from ...models.class_diagram.generalization_set import GeneralizationSet
 from ...models.class_diagram.generalization import Generalization
 from ...models.class_diagram.attribute import Attribute
 from ...models.class_diagram.class_node import ClassNode
+from ...models.class_diagram.association_class import AssociationClass
+from ...models.class_diagram.association_class_connection import AssociationClassConnection
 import re
 
 
@@ -77,11 +79,60 @@ class EaClsDiagramParser(ClsDiagramParser):
         m_associations = []
         m_association_nodes = []
         associations = model.findall('.//packagedElement[@xmi:type="uml:Association"]', namespaces)
+        association_classes = model.findall('.//packagedElement[@xmi:type="uml:AssociationClass"]', namespaces)
+        # associations
         for a in associations:
             parsed_associations, parsed_association_nodes = self.parse_association(a, model, namespaces)
             m_associations.extend(parsed_associations)
             m_association_nodes.extend(parsed_association_nodes)
+        # association class
+        for ac in association_classes:
+            parsed_associations, parsed_association_nodes = self.parse_association(ac, model, namespaces)
+            m_associations.extend(parsed_associations)
+            m_association_nodes.extend(parsed_association_nodes)
         return m_associations, m_association_nodes
+
+    def parse_association_classes(self, model, namespaces):
+        m_association_classes = []
+        m_association_class_connections = []
+        association_classes = model.findall('.//packagedElement[@xmi:type="uml:AssociationClass"]', namespaces)
+        for ac in association_classes:
+            parsed_association_class, parsed_association_class_connections =  self.parse_association_class(ac, model, namespaces)
+            m_association_classes.append(parsed_association_class)
+            m_association_class_connections.extend(parsed_association_class_connections)
+        return m_association_classes, m_association_class_connections
+
+    def parse_association_class(self, ac, model, namespaces):
+        # parse associations
+        # create association class
+        # correctly connect all nodes
+        association_class_connections = []
+
+        assoc_class_id = ac.attrib["{" + namespaces['xmi'] + "}" + "id"]
+        name = ac.attrib["name"] if "name" in ac.attrib else ""
+        association_class = AssociationClass(assoc_class_id)
+        member_ends = ac.findall('memberEnd', namespaces)
+        for m in member_ends:
+            id_ref = m.attrib["{" + namespaces['xmi'] + "}" + "idref"]
+            dest = self.find_ref_element(model, id_ref, namespaces)
+            src = association_class.node_id
+            association_class_connection = AssociationClassConnection(assoc_class_id, name, src, dest)
+            association_class_connections.append(association_class_connection)
+
+        association_class_refs = model.findall('.//packagedElement[@xmi:type="uml:Class"]', namespaces)
+        for acr in association_class_refs:
+            if acr.attrib["name"] == name:
+                dest = acr.attrib["{" + namespaces['xmi'] + "}" + "id"]
+                src = association_class.node_id
+                association_class_connection = AssociationClassConnection(assoc_class_id, name, src, dest)
+                association_class_connections.append(association_class_connection)
+
+        return association_class, association_class_connections
+
+
+
+
+
 
     def parse_association(self, a, model, namespaces):
         associations = []

@@ -16,18 +16,21 @@ class ClsDiagramParser:
         m_id = self.parse_id(model, namespaces)
         m_classes = self.parse_classes(model, namespaces)
         m_associations, m_association_nodes = self.parse_associations(model, namespaces)
+        m_association_classes, m_association_class_connections = self.parse_association_classes(model, namespaces)
         m_generalizations = self.parse_generalizations(model, namespaces)
         c_types, a_types = self.parse_types(model, namespaces)
         m_gsets = self.parse_generalization_sets(model, namespaces)
-        # TODO return neo4j model consisting from nodes and relations only
-        #  implement in ClsDiagramModel
-        return ClsDiagramModel(m_id, m_classes, m_associations, m_association_nodes
+        return ClsDiagramModel(m_id, m_classes, m_associations, m_association_nodes, m_association_classes
+                               , m_association_class_connections
                                , m_generalizations, m_gsets, c_types, a_types)
 
     def parse_id(self, model, namespaces):
         pass
 
     def parse_classes(self, model, namespaces):
+        pass
+
+    def parse_association_classes(self, model, namespaces):
         pass
 
     def parse_types(self, model, namespaces):
