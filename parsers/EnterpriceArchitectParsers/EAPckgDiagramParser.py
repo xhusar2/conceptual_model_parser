@@ -49,7 +49,7 @@ class EAPckgDiagramParser(PckgDiagramParser):
 
     def parse_dependencies(self, model, namespaces):
         m_dependencies = []
-        dependencies = model.findall('.//ownedMember[@xmi:type="uml:Dependency"]', namespaces)
+        dependencies = model.findall('.//packagedElement[@xmi:type="uml:Dependency"]', namespaces)
         for dependency in dependencies:
             self.parse_dependency(dependency, namespaces, m_dependencies)
         return m_dependencies

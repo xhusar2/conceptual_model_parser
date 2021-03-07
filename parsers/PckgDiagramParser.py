@@ -54,13 +54,13 @@ class PckgDiagramParser:
     def parse_member_package(self, package, namespaces, members):
         pass
 
-    def get_model(self, file_name, namespaces):
-        pass
-
     def parse_usages(self, packages, namespaces):
         pass
 
     def parse_usage(self, model, namespaces, usages):
+        pass
+
+    def get_model(self, file_name, namespaces):
         pass
 
     @staticmethod
