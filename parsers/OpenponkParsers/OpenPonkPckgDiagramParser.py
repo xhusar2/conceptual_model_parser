@@ -1,11 +1,11 @@
-from parsers.PckgDiagramParser import PckgDiagramParser
-from models.packageDiagram.PckgNode import PckgNode
-from models.packageDiagram.PckgRelation import PckgRelation
+from parsers.PackageDiagramParser import PackageDiagramParser
+from models.packageDiagram.PackageNode import PackageNode
+from models.packageDiagram.PackageRelation import PackageRelation
 from lxml import etree
 import uuid
 
 
-class OpenPonkPckgDiagramParser(PckgDiagramParser):
+class OpenPonkPackageDiagramParser(PackageDiagramParser):
     def parse_nodes(self, model, namespaces):
         m_nodes = self.parse_packages(model, namespaces)
         return m_nodes
@@ -19,13 +19,7 @@ class OpenPonkPckgDiagramParser(PckgDiagramParser):
 
     # TODO refactor
     def parse_id(self, model, namespaces):
-        packaged_element = model.find('./packagedElement', namespaces)
-        if packaged_element is not None:
-            return packaged_element.attrib['{' + namespaces['xmi'] + '}' + 'id']
-        id_attrib = '{' + namespaces['xmi'] + '}' + ':id'
-        if id_attrib in model.attrib:
-            return model.attrib[id_attrib]
-        return ""
+        return str(uuid.uuid4())
 
     def parse_packages(self, model, namespaces):
         m_packages = []
@@ -42,7 +36,7 @@ class OpenPonkPckgDiagramParser(PckgDiagramParser):
             node_visibility = package.attrib["visibility"]
         else:
             node_visibility = "public"
-        node = PckgNode(node_name, node_id, node_class, node_visibility)
+        node = PackageNode(node_name, node_id, node_class, node_visibility)
         packages.append(node)
         return
 
@@ -52,15 +46,16 @@ class OpenPonkPckgDiagramParser(PckgDiagramParser):
             self.parse_import(package, namespaces, m_imports)
         return m_imports
 
+    # TODO refactor neni vubec hezke
     def parse_import(self, package, namespaces, imports: list):
         children = package.getchildren()
         for child in children:
             if child.attrib["{" + namespaces['xmi'] + "}" + "type"] == "uml:PackageImport":
                 import_id = child.attrib["{" + namespaces['xmi'] + "}" + "id"]
-                import_source = child.getchildren()[0].attrib["{" + namespaces['xmi'] + "}" + "idref"]
-                import_target = package.attrib["{" + namespaces['xmi'] + "}" + "id"]
+                import_target = child.getchildren()[0].attrib["{" + namespaces['xmi'] + "}" + "idref"]
+                import_source = package.attrib["{" + namespaces['xmi'] + "}" + "id"]
                 import_type = "PackageImport"
-                m_import = PckgRelation(import_id, import_source, import_target, import_type)
+                m_import = PackageRelation(import_id, import_source, import_target, import_type)
                 imports.append(m_import)
         return
 
@@ -77,10 +72,10 @@ class OpenPonkPckgDiagramParser(PckgDiagramParser):
                     or child.attrib["{" + namespaces['xmi'] + "}" + "type"] == "uml:Model":
                 # need to generate unique id
                 member_id = str(uuid.uuid4())
-                member_target = child.attrib["{" + namespaces['xmi'] + "}" + "id"]
-                member_source = package.attrib["{" + namespaces['xmi'] + "}" + "id"]
+                member_source = child.attrib["{" + namespaces['xmi'] + "}" + "id"]
+                member_target = package.attrib["{" + namespaces['xmi'] + "}" + "id"]
                 member_type = "MemberOf"
-                m_member = PckgRelation(member_id, member_source, member_target, member_type)
+                m_member = PackageRelation(member_id, member_source, member_target, member_type)
                 members.append(m_member)
         return
 

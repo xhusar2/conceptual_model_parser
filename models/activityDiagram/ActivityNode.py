@@ -1,5 +1,3 @@
-
-
 class ActivityNode:
     name = ""
     id = ""

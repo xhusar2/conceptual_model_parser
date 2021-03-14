@@ -1,7 +1,5 @@
 from ..Model import Model
-from lxml import etree
-from neomodel import StructuredNode, StringProperty, ArrayProperty, Relationship, config, StructuredRel, JSONProperty,\
-    UniqueIdProperty
+from neomodel import StructuredNode, StringProperty, Relationship, StructuredRel, UniqueIdProperty
 
 
 class PackageDiagramModel(Model):
@@ -11,25 +9,26 @@ class PackageDiagramModel(Model):
         self.nodes = nodes
         self.relations = relations
 
-    # return dict id, node
     def get_neo4j_model(self):
         m_nodes = {}
         relations = []
 
         for n in self.nodes:
-            if n.node_class == "Package":
-                node = Package(_id=n.id, name=n.name, type=n.node_class, model_id=self.id, visibility=n.visibility)
+            if n.node_type == "Package":
+                node = Package(_id=n.id, name=n.name, node_type=n.node_type, model_id=self.id, visibility=n.visibility)
             else:
                 node = None
-            m_nodes[node._id] = node
+            if node is not None:
+                m_nodes[n.id] = node
 
         for r in self.relations:
-            if r.dest is not None and r.src is not None:
-                rel_source = r.dest
-                rel_dest = r.src
+            if r.target is not None and r.source is not None:
+                rel_source = r.source
+                rel_dest = r.target
                 rel_props = {
                     'rel_type': r.relation_type,
                     'relation_id': r.id,
+                    'model_id': self.id
                 }
                 rel_attrib = r.relation_type
                 relations.append((rel_source, rel_dest, rel_props, rel_attrib))
@@ -40,13 +39,14 @@ class PackageDiagramModel(Model):
 class RelationModel(StructuredRel):
     relation_id = StringProperty()
     rel_type = StringProperty()
+    model_id = StringProperty()
 
 
 class Package(StructuredNode):
     model_id = StringProperty()
     _id = UniqueIdProperty()
     name = StringProperty()
-    type = StringProperty()
+    node_type = StringProperty()
     visibility = StringProperty()
     Dependency = Relationship("Package", "dependency", model=RelationModel)
     PackageMerge = Relationship("Package", "merge", model=RelationModel)

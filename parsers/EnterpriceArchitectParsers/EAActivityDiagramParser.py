@@ -1,6 +1,6 @@
 from parsers.ActivityDiagramParser import ActivityDiagramParser
-from models.activityModel.nodes.ActivityNode import ActivityNode
-from models.activityModel.relations.ActivityRelation import ActivityRelation
+from models.activityDiagram.ActivityNode import ActivityNode
+from models.activityDiagram.ActivityRelation import ActivityRelation
 from lxml import etree
 import uuid
 
@@ -28,12 +28,15 @@ class EAActDiagramParser(ActivityDiagramParser):
         m_nodes.extend(self.parse_partitions(model, namespaces))
         m_nodes.extend(self.parse_central_buffers(model, namespaces))
         m_nodes.extend(self.parse_pins(model, namespaces))
+        m_nodes.extend(self.parse_instance_specifications(model, namespaces))
+        m_nodes.extend(self.parse_datastores(model, namespaces))
         return m_nodes
 
     def parse_relations(self, model, namespaces):
         m_relations = self.parse_control_flows(model, namespaces)
         m_relations.extend(self.parse_object_flows(model, namespaces))
         m_relations.extend(self.parse_partition_relations(model, namespaces))
+        m_relations.extend(self.parse_pin_relations(model, namespaces))
         return m_relations
 
     # TODO rename
@@ -204,3 +207,33 @@ class EAActDiagramParser(ActivityDiagramParser):
         node = ActivityNode(name=pin_name, node_id=pin_id, node_type=pin_type, visibility=pin_visibility, ordering=pin_ordering)
         m_pins.append(node)
         return
+
+    def parse_instance_specifications(self, model, namespaces):
+        m_objects = []
+        instance_specifications = model.findall('.//packagedElement[@xmi:type="uml:InstanceSpecification"]', namespaces)
+        for instance in instance_specifications:
+            self.parse_node(instance, namespaces, "Object", m_objects)
+        return m_objects
+
+    def parse_datastores(self, model, namespaces):
+        m_datastores = []
+        datastores = model.findall('.//node[@xmi:type="uml:DataStoreNode"]', namespaces)
+        for datastore in datastores:
+            self.parse_node(datastore, namespaces, "DataStore", m_datastores)
+        return m_datastores
+
+    @staticmethod
+    def parse_pin_relations(model, namespaces):
+        pin_relations = []
+        actions = model.findall('.//node[@xmi:type="uml:Action"]', namespaces)
+        for action in actions:
+            pins = action.findall('.//input[@xmi:type="uml:InputPin"]', namespaces)
+            pins.extend(action.findall('.//output[@xmi:type="uml:OutputPin"]', namespaces))
+            for pin in pins:
+                rel_id = str(uuid.uuid4())
+                rel_target = action.attrib["{" + namespaces['xmi'] + "}" + "id"]
+                rel_source = pin.attrib["{" + namespaces['xmi'] + "}" + "id"]
+                rel_type = "HasPin"
+                m_rel = ActivityRelation(rel_id, rel_source, rel_target, rel_type)
+                pin_relations.append(m_rel)
+        return pin_relations

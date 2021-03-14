@@ -1,8 +1,8 @@
-from models.packageDiagram.PckgDiagramModel import PackageDiagramModel
+from models.packageDiagram.PackageDiagramModel import PackageDiagramModel
 from lxml import etree
 
 
-class PckgDiagramParser:
+class PackageDiagramParser:
 
     def parse_file(self, file_name: str) -> PackageDiagramModel:
         namespaces = self.get_namespaces(file_name)
@@ -27,37 +27,19 @@ class PckgDiagramParser:
     def parse_packages(self, model, namespaces):
         pass
 
-    def parse_package(self, package, namespaces, packages):
-        pass
-
     def parse_dependencies(self, model, namespaces):
-        pass
-
-    def parse_dependency(self, dependency, namespaces, dependencies):
         pass
 
     def parse_merges(self, packages, namespaces):
         pass
 
-    def parse_merge(self, package, namespaces, merges):
-        pass
-
     def parse_imports(self, packages, namespaces):
-        pass
-
-    def parse_import(self, package, namespaces, imports):
         pass
 
     def parse_member_packages(self, packages, namespaces):
         pass
 
-    def parse_member_package(self, package, namespaces, members):
-        pass
-
     def parse_usages(self, packages, namespaces):
-        pass
-
-    def parse_usage(self, model, namespaces, usages):
         pass
 
     def get_model(self, file_name, namespaces):

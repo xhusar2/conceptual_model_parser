@@ -1,4 +1,4 @@
-from models.activityModel.ActivityDiagramModel import ActivityDiagramModel
+from models.activityDiagram.ActivityDiagramModel import ActivityDiagramModel
 from lxml import etree
 
 
