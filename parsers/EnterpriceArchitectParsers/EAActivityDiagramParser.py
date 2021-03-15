@@ -188,7 +188,7 @@ class EAActDiagramParser(ActivityDiagramParser):
             m_objects.append(self.parse_node(instance, namespaces, "Object"))
         return m_objects
 
-    def parse_datastores(self, model, namespaces):
+    def parse_data_stores(self, model, namespaces):
         m_data_stores = []
         data_stores = model.findall('.//node[@xmi:type="uml:DataStoreNode"]', namespaces)
         for data_store in data_stores:

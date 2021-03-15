@@ -62,6 +62,9 @@ class ActivityDiagramParser:
     def parse_pins(self, model, namespaces):
         pass
 
+    def parse_data_stores(self, model, namespaces):
+        pass
+
     @staticmethod
     def get_namespaces(file_name):
         return etree.parse(file_name).getroot().nsmap

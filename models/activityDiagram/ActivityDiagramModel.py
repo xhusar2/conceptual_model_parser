@@ -9,7 +9,6 @@ class ActivityDiagramModel(Model):
         self.nodes = nodes
         self.relations = relations
 
-    # return dict id, node
     def get_neo4j_model(self):
         m_nodes = self.get_nodes()
         relations = self.get_relations()
@@ -25,18 +24,18 @@ class ActivityDiagramModel(Model):
 
     def get_relations(self):
         relations = []
-        for r in self.relations:
-            if r.target is not None and r.source is not None:
-                rel_source = r.source
-                rel_destination = r.target
-                rel_props = {
-                    'rel_type': r.relation_type,
-                    'relation_id': r.id,
-                    'guard': r.guard,
+        for relation in self.relations:
+            if relation.target is not None and relation.source is not None:
+                relation_source = relation.source
+                relation_target = relation.target
+                relation_properties = {
+                    'rel_type': relation.relation_type,
+                    'relation_id': relation.id,
+                    'guard': relation.guard,
                     'model_id': self.id
                 }
-                rel_attrib = r.relation_type
-                relations.append((rel_source, rel_destination, rel_props, rel_attrib))
+                relation_type = relation.relation_type
+                relations.append((relation_source, relation_target, relation_properties, relation_type))
         return relations
 
     def get_node_type(self, node):
@@ -113,7 +112,6 @@ class Partition(ActivityDiagramNode):
 class ObjectNode(ActivityNode):
     ObjectFlow = Relationship("ObjectNode", "objectFlow", model=RelationModel)
     name = StringProperty()
-    pass
 
 
 class Pin(ObjectNode):
