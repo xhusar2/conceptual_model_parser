@@ -19,7 +19,10 @@ class VPPackageParser(PackageDiagramParser):
         return m_relations
 
     def parse_id(self, model, namespaces):
-        pass
+        if '{' + namespaces['xmi'] + '}' + 'id' not in model.attrib:
+            return uuid.uuid4()
+        else:
+            return model.attrib['{' + namespaces['xmi'] + '}' + 'id']
 
     def parse_packages(self, model, namespaces):
         m_packages = []
