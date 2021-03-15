@@ -11,6 +11,3 @@ class ActivityNode:
         self.node_type = node_type
         self.visibility = visibility
         self.ordering = ordering
-
-    def __str__(self):
-        return f'id:{self.id} name: {self.name}'

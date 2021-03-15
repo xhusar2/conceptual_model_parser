@@ -41,186 +41,159 @@ class EAActDiagramParser(ActivityDiagramParser):
 
     # TODO rename
     @staticmethod
-    def parse_node(node, namespaces, n_type, m_nodes):
+    def parse_node(node, namespaces, n_type):
         node_id = node.attrib["{" + namespaces['xmi'] + "}" + "id"]
-        node_name = node.attrib["name"]
+        if 'name' in node.attrib:
+            node_name = node.attrib["name"]
+        else:
+            node_name = None
         node_type = n_type
         node_visibility = node.attrib["visibility"]
-        node = ActivityNode(name=node_name, node_id=node_id, node_type=node_type, visibility=node_visibility)
-        m_nodes.append(node)
-        return
+        return ActivityNode(name=node_name, node_id=node_id, node_type=node_type, visibility=node_visibility)
 
     def parse_actions(self, model, namespaces):
         m_actions = []
         actions = model.findall('.//node[@xmi:type="uml:Action"]', namespaces)
         for action in actions:
-            self.parse_node(action, namespaces, "Action", m_actions)
+            m_actions.append(self.parse_node(action, namespaces, "Action"))
         return m_actions
 
     def parse_initial_nodes(self, model, namespaces):
         m_initials = []
         initials = model.findall('.//node[@xmi:type="uml:InitialNode"]', namespaces)
         for initial in initials:
-            self.parse_node(initial, namespaces, "Initial", m_initials)
+            m_initials.append(self.parse_node(initial, namespaces, "Initial"))
         return m_initials
 
     def parse_activity_finals(self, model, namespaces):
         m_finals = []
         finals = model.findall('.//node[@xmi:type="uml:ActivityFinalNode"]', namespaces)
         for final in finals:
-            self.parse_node(final, namespaces, "ActivityFinal", m_finals)
+            m_finals.append(self.parse_node(final, namespaces, "ActivityFinal"))
         return m_finals
 
     def parse_flow_finals(self, model, namespaces):
         m_flow_finals = []
         f_finals = model.findall('.//node[@xmi:type="uml:FlowFinalNode"]', namespaces)
         for f_final in f_finals:
-            self.parse_node(f_final, namespaces, "FlowFinal", m_flow_finals)
+            m_flow_finals.append(self.parse_node(f_final, namespaces, "FlowFinal"))
         return m_flow_finals
 
     def parse_forks_joins(self, model, namespaces):
         m_forks = []
         forks = model.findall('.//node[@xmi:type="uml:ForkNode"]', namespaces)
         for fork in forks:
-            self.parse_fork_join(fork, namespaces, m_forks)
+            m_forks.append(self.parse_node(fork, namespaces, "ForkJoin"))
         return m_forks
-
-    @staticmethod
-    def parse_fork_join(fork, namespaces, forks):
-        node_id = fork.attrib["{" + namespaces['xmi'] + "}" + "id"]
-        node_class = "ForkJoin"
-        node_visibility = fork.attrib["visibility"]
-        node = ActivityNode(node_id=node_id, node_type=node_class, visibility=node_visibility)
-        forks.append(node)
-        return
 
     def parse_decisions_merges(self, model, namespaces):
         m_decisions = []
         decisions = model.findall('.//node[@xmi:type="uml:DecisionNode"]', namespaces)
         for decision in decisions:
-            self.parse_node(decision, namespaces, "DecisionMerge", m_decisions)
+            m_decisions.append(self.parse_node(decision, namespaces, "DecisionMerge"))
         return m_decisions
 
     def parse_central_buffers(self, model, namespaces):
         m_buffer = []
         buffers = model.findall('.//node[@xmi:type="uml:CentralBufferNode"]', namespaces)
         for buffer in buffers:
-            self.parse_node(buffer, namespaces, "CentralBuffer", m_buffer)
+            m_buffer.append(self.parse_node(buffer, namespaces, "CentralBuffer"))
         return m_buffer
+
+    @staticmethod
+    def parse_flow_relation(flow, namespaces, rel_type):
+        guard = flow.find('.//guard[@xmi:type="uml:OpaqueExpression"]', namespaces)
+        if guard is not None and 'body' in guard.attrib:
+            relation_guard = guard.attrib["body"]
+        else:
+            relation_guard = None
+        relation_id = flow.attrib["{" + namespaces['xmi'] + "}" + "id"]
+        relation_target = flow.attrib["target"]
+        relation_source = flow.attrib["source"]
+        relation_type = rel_type
+        return ActivityRelation(relation_id, relation_source, relation_target, relation_type, relation_guard)
 
     def parse_control_flows(self, model, namespaces):
         m_control_flows = []
         c_flows = model.findall('.//edge[@xmi:type="uml:ControlFlow"]', namespaces)
         for c_flow in c_flows:
-            self.parse_control_flow(c_flow, namespaces, m_control_flows)
+            m_control_flows.append(self.parse_flow_relation(c_flow, namespaces, "ControlFlow"))
         return m_control_flows
-
-    @staticmethod
-    def parse_control_flow(c_flow, namespaces, c_flows):
-        relation_id = c_flow.attrib["{" + namespaces['xmi'] + "}" + "id"]
-        relation_source = c_flow.attrib["target"]
-        relation_target = c_flow.attrib["source"]
-        relation_type = "ControlFlow"
-        relation_rel = ActivityRelation(relation_id, relation_source, relation_target, relation_type)
-        c_flows.append(relation_rel)
-        return
 
     def parse_object_flows(self, model, namespaces):
         m_object_flows = []
         o_flows = model.findall('.//edge[@xmi:type="uml:ObjectFlow"]', namespaces)
         for o_flow in o_flows:
-            self.parse_object_flow(o_flow, namespaces, m_object_flows)
+            m_object_flows.append(self.parse_flow_relation(o_flow, namespaces, "ObjectFlow"))
         return m_object_flows
-
-    @staticmethod
-    def parse_object_flow(o_flow, namespaces, o_flows):
-        relation_id = o_flow.attrib["{" + namespaces['xmi'] + "}" + "id"]
-        relation_source = o_flow.attrib["target"]
-        relation_target = o_flow.attrib["source"]
-        relation_type = "ObjectFlow"
-        relation_rel = ActivityRelation(relation_id, relation_source, relation_target, relation_type)
-        o_flows.append(relation_rel)
-        return
 
     def parse_partitions(self, model, namespaces):
         m_partitions = []
         partitions = model.findall('.//group[@xmi:type="uml:ActivityPartition"]', namespaces)
         for partition in partitions:
-            self.parse_partition(partition, namespaces, m_partitions)
+            m_partitions.append(self.parse_node(partition, namespaces, "Partition"))
         return m_partitions
 
-    @staticmethod
-    def parse_partition(partition, namespaces, partitions):
-        node_id = partition.attrib["{" + namespaces['xmi'] + "}" + "id"]
-        node_name = partition.attrib["name"]
-        node_class = "Partition"
-        node_visibility = partition.attrib["visibility"]
-        node = ActivityNode(name=node_name, node_id=node_id, node_type=node_class, visibility=node_visibility)
-        partitions.append(node)
-        return
-
     def parse_partition_relations(self, model, namespaces):
-        m_partition_rels = []
+        m_partition_relations = []
         partitions = model.findall('.//group[@xmi:type="uml:ActivityPartition"]', namespaces)
         for partition in partitions:
-            self.parse_partition_relation(partition, namespaces, m_partition_rels)
-        return m_partition_rels
+            children = partition.getchildren()
+            for child in children:
+                m_partition_relations.append(self.parse_partition_relation(child, partition, namespaces))
+        return m_partition_relations
 
     @staticmethod
-    def parse_partition_relation(partition, namespaces, partition_relations):
-        children = partition.getchildren()
-        for child in children:
-            # need to generate unique id
-            rel_id = str(uuid.uuid4())
-            rel_target = child.attrib["{" + namespaces['xmi'] + "}" + "idref"]
-            rel_source = partition.attrib["{" + namespaces['xmi'] + "}" + "id"]
-            rel_type = "PartitionMember"
-            m_rel = ActivityRelation(rel_id, rel_source, rel_target, rel_type)
-            partition_relations.append(m_rel)
-        return
+    def parse_partition_relation(child, partition, namespaces):
+        # need to generate unique id
+        rel_id = str(uuid.uuid4())
+        rel_source = child.attrib["{" + namespaces['xmi'] + "}" + "idref"]
+        rel_target = partition.attrib["{" + namespaces['xmi'] + "}" + "id"]
+        rel_type = "PartitionMember"
+        return ActivityRelation(rel_id, rel_source, rel_target, rel_type)
 
     def parse_pins(self, model, namespaces):
         m_pins = []
-        self.parse_input_pins(model, namespaces, m_pins)
-        self.parse_output_pins(model, namespaces, m_pins)
+        m_pins.extend(self.parse_input_pins(model, namespaces))
+        m_pins.extend(self.parse_output_pins(model, namespaces))
         return m_pins
 
-    def parse_input_pins(self, model, namespaces, m_pins):
+    def parse_input_pins(self, model, namespaces):
+        m_input_pins = []
         input_pins = model.findall('.//input[@xmi:type="uml:InputPin"]', namespaces)
         for pin in input_pins:
-            self.parse_pin(pin, namespaces, "InputPin", m_pins)
-        return
+            m_input_pins.append(self.parse_pin(pin, namespaces, "InputPin"))
+        return m_input_pins
 
-    def parse_output_pins(self, model, namespaces, m_pins):
-        input_pins = model.findall('.//output[@xmi:type="uml:OutputPin"]', namespaces)
-        for pin in input_pins:
-            self.parse_pin(pin, namespaces, "OutputPin", m_pins)
-        return
+    def parse_output_pins(self, model, namespaces):
+        m_output_pins = []
+        output_pins = model.findall('.//output[@xmi:type="uml:OutputPin"]', namespaces)
+        for pin in output_pins:
+            m_output_pins.append(self.parse_pin(pin, namespaces, "OutputPin"))
+        return m_output_pins
 
     @staticmethod
-    def parse_pin(pin, namespaces, p_type, m_pins):
+    def parse_pin(pin, namespaces, p_type):
         pin_id = pin.attrib["{" + namespaces['xmi'] + "}" + "id"]
         pin_name = pin.attrib["name"]
         pin_type = p_type
         pin_visibility = pin.attrib["visibility"]
         pin_ordering = pin.attrib["ordering"]
-        node = ActivityNode(name=pin_name, node_id=pin_id, node_type=pin_type, visibility=pin_visibility, ordering=pin_ordering)
-        m_pins.append(node)
-        return
+        return ActivityNode(name=pin_name, node_id=pin_id, node_type=pin_type, visibility=pin_visibility, ordering=pin_ordering)
 
     def parse_instance_specifications(self, model, namespaces):
         m_objects = []
         instance_specifications = model.findall('.//packagedElement[@xmi:type="uml:InstanceSpecification"]', namespaces)
         for instance in instance_specifications:
-            self.parse_node(instance, namespaces, "Object", m_objects)
+            m_objects.append(self.parse_node(instance, namespaces, "Object"))
         return m_objects
 
     def parse_datastores(self, model, namespaces):
-        m_datastores = []
-        datastores = model.findall('.//node[@xmi:type="uml:DataStoreNode"]', namespaces)
-        for datastore in datastores:
-            self.parse_node(datastore, namespaces, "DataStore", m_datastores)
-        return m_datastores
+        m_data_stores = []
+        data_stores = model.findall('.//node[@xmi:type="uml:DataStoreNode"]', namespaces)
+        for data_store in data_stores:
+            m_data_stores.append(self.parse_node(data_store, namespaces, "DataStore"))
+        return m_data_stores
 
     @staticmethod
     def parse_pin_relations(model, namespaces):
@@ -231,8 +204,8 @@ class EAActDiagramParser(ActivityDiagramParser):
             pins.extend(action.findall('.//output[@xmi:type="uml:OutputPin"]', namespaces))
             for pin in pins:
                 rel_id = str(uuid.uuid4())
-                rel_target = action.attrib["{" + namespaces['xmi'] + "}" + "id"]
-                rel_source = pin.attrib["{" + namespaces['xmi'] + "}" + "id"]
+                rel_target = pin.attrib["{" + namespaces['xmi'] + "}" + "id"]
+                rel_source = action.attrib["{" + namespaces['xmi'] + "}" + "id"]
                 rel_type = "HasPin"
                 m_rel = ActivityRelation(rel_id, rel_source, rel_target, rel_type)
                 pin_relations.append(m_rel)

@@ -10,30 +10,35 @@ class PackageDiagramModel(Model):
         self.relations = relations
 
     def get_neo4j_model(self):
-        m_nodes = {}
-        relations = []
+        nodes = self.get_nodes()
+        relations = self.get_relations()
+        return nodes, relations
 
+    def get_nodes(self):
+        nodes = {}
         for n in self.nodes:
             if n.node_type == "Package":
                 node = Package(_id=n.id, name=n.name, node_type=n.node_type, model_id=self.id, visibility=n.visibility)
             else:
                 node = None
             if node is not None:
-                m_nodes[n.id] = node
+                nodes[n.id] = node
+        return nodes
 
+    def get_relations(self):
+        relations = []
         for r in self.relations:
             if r.target is not None and r.source is not None:
                 rel_source = r.source
-                rel_dest = r.target
+                rel_destination = r.target
                 rel_props = {
                     'rel_type': r.relation_type,
                     'relation_id': r.id,
                     'model_id': self.id
                 }
                 rel_attrib = r.relation_type
-                relations.append((rel_source, rel_dest, rel_props, rel_attrib))
-
-        return m_nodes, relations
+                relations.append((rel_source, rel_destination, rel_props, rel_attrib))
+        return relations
 
 
 class RelationModel(StructuredRel):

@@ -11,17 +11,24 @@ class ActivityDiagramModel(Model):
 
     # return dict id, node
     def get_neo4j_model(self):
-        m_nodes = {}
-        relations = []
+        m_nodes = self.get_nodes()
+        relations = self.get_relations()
+        return m_nodes, relations
+
+    def get_nodes(self):
+        nodes = {}
         for n in self.nodes:
             node = self.get_node_type(n)
             if node is not None:
-                m_nodes[n.id] = node
+                nodes[n.id] = node
+        return nodes
 
+    def get_relations(self):
+        relations = []
         for r in self.relations:
-            if r.dest is not None and r.src is not None:
-                rel_source = r.dest
-                rel_dest = r.src
+            if r.target is not None and r.source is not None:
+                rel_source = r.source
+                rel_destination = r.target
                 rel_props = {
                     'rel_type': r.relation_type,
                     'relation_id': r.id,
@@ -29,9 +36,8 @@ class ActivityDiagramModel(Model):
                     'model_id': self.id
                 }
                 rel_attrib = r.relation_type
-                relations.append((rel_source, rel_dest, rel_props, rel_attrib))
-
-        return m_nodes, relations
+                relations.append((rel_source, rel_destination, rel_props, rel_attrib))
+        return relations
 
     def get_node_type(self, node):
         if node.node_type == "Action":

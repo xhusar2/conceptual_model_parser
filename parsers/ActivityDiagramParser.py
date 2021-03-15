@@ -8,13 +8,13 @@ class ActivityDiagramParser:
         model = self.get_model(file_name, namespaces)
         return self.parse_model(model, namespaces)
 
-    def parse_model(self, model, namespaces):
-        m_id = self.parse_id(model, namespaces)
-        m_nodes = self.parse_nodes(model, namespaces)
-        m_relations = self.parse_relations(model, namespaces)
-        return ActivityDiagramModel(m_id, m_nodes, m_relations)
+    def parse_model(self, model, namespaces) -> ActivityDiagramModel:
+        model_id = self.parse_id(model, namespaces)
+        nodes = self.parse_nodes(model, namespaces)
+        relations = self.parse_relations(model, namespaces)
+        return ActivityDiagramModel(model_id, nodes, relations)
 
-    def parse_id(self, model, namespaces):
+    def parse_id(self, model, namespaces) -> str:
         pass
 
     def get_model(self, file_name, namespaces):
