@@ -5,7 +5,7 @@ class ActivityNode:
     visibility = ""
     ordering = ""
 
-    def __init__(self, node_id, node_type, visibility, name=None, ordering=None):
+    def __init__(self, node_id, node_type, visibility=None, name=None, ordering=None):
         self.name = name
         self.id = node_id
         self.node_type = node_type

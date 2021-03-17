@@ -3,7 +3,7 @@ from lxml import etree
 
 
 class ActivityDiagramParser:
-    def parse_file(self, file_name: str) -> ActivityDiagramModel:
+    def parse_file(self, file_name) -> ActivityDiagramModel:
         namespaces = self.get_namespaces(file_name)
         model = self.get_model(file_name, namespaces)
         return self.parse_model(model, namespaces)
@@ -14,7 +14,7 @@ class ActivityDiagramParser:
         relations = self.parse_relations(model, namespaces)
         return ActivityDiagramModel(model_id, nodes, relations)
 
-    def parse_id(self, model, namespaces) -> str:
+    def parse_id(self, model, namespaces):
         pass
 
     def get_model(self, file_name, namespaces):

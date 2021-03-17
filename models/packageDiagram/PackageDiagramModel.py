@@ -4,10 +4,11 @@ from neomodel import StructuredNode, StringProperty, Relationship, StructuredRel
 
 class PackageDiagramModel(Model):
 
-    def __init__(self, model_id, nodes, relations):
+    def __init__(self, model_id, nodes, relations, url=None):
         self.id = model_id
         self.nodes = nodes
         self.relations = relations
+        self.url = url
 
     def get_neo4j_model(self):
         nodes = self.get_nodes()
@@ -18,7 +19,8 @@ class PackageDiagramModel(Model):
         nodes = {}
         for n in self.nodes:
             if n.node_type == "Package":
-                node = Package(_id=n.id, name=n.name, node_type=n.node_type, model_id=self.id, visibility=n.visibility)
+                node = Package(_id=n.id, name=n.name, node_type=n.node_type, model_id=self.id, visibility=n.visibility,
+                               url=self.url)
             else:
                 node = None
             if node is not None:
@@ -53,6 +55,7 @@ class Package(StructuredNode):
     name = StringProperty()
     node_type = StringProperty()
     visibility = StringProperty()
+    url = StringProperty()
     Dependency = Relationship("Package", "dependency", model=RelationModel)
     PackageMerge = Relationship("Package", "merge", model=RelationModel)
     PackageImport = Relationship("Package", "import", model=RelationModel)
