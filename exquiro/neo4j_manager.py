@@ -18,6 +18,11 @@ class Neo4jManager():
         neo_db.cypher_query("MATCH (n) DETACH DELETE n")
 
     @staticmethod
+    def delete_model(model_id):
+        neo_db.cypher_query(f'MATCH (n)-[r]-() WHERE n.model_id = \'{model_id}\' DETACH DELETE r')
+        neo_db.cypher_query(f'MATCH (n) WHERE n.model_id = \'{model_id}\' DETACH DELETE n')
+
+    @staticmethod
     def add_model(model):
         nodes, relations = model.get_neo4j_model()
         _nodes = {}

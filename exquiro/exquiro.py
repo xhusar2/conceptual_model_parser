@@ -5,7 +5,7 @@ from .parsers.parser_factory import ParserFactory
 from .parsers.enterprise_architect.ea_class_diagram_parser import  EaClsDiagramParser
 from .parsers.openponk.openpondk_class_diagram_parser import OpenponkClsDiagramParser
 from configparser import ConfigParser
-
+import requests
 #: Paths to default configuration files
 DEFAULT_CONFIG_FILES = [
     '../config/app.cfg',
@@ -37,7 +37,7 @@ class Exquiro():
             parsed_model = parser.parse_file(file_path)
             try:
                 # print("model name:", parsed_model.id)
-                self.neo4j_manager.delete_all()
+                self.neo4j_manager.delete_model(model_id=parsed_model.id)
                 self.neo4j_manager.add_model(parsed_model)
             except:
                 print(f'could not parse model from file {file_path}')
@@ -46,8 +46,22 @@ class Exquiro():
 
     def add_models_from_github(self, repo_url, owner="", token=""):
         xmi_files = []
+        results = []
         get_xmi_files(xmi_files, token, owner, repo_url)
         print(len(xmi_files))
+        #download files
+        for file_url in xmi_files:
+            print(file_url)
+            try:
+                res = requests.get(file_url)
+
+                file = open("download_file.xml", "w")
+                file.write(res.text)
+                file.close()
+                results.append(self.add_model_from_file("download_file.xml"))
+            except:
+                print(f'file download error {file_url}')
+        return False if False in results else True
 
 
 def create_app():
