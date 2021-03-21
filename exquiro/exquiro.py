@@ -61,7 +61,7 @@ class Exquiro():
                 results.append(self.add_model_from_file("download_file.xml"))
             except:
                 print(f'file download error {file_url}')
-        return False if False in results else True
+        return sum(results), len(xmi_files)
 
 
 def create_app():
