@@ -1,8 +1,9 @@
 from models.activityDiagram.ActivityDiagramModel import ActivityDiagramModel
+from parsers.DiagramParser import DiagramParser
 from lxml import etree
 
 
-class ActivityDiagramParser:
+class ActivityDiagramParser(DiagramParser):
     def parse_file(self, file_name) -> ActivityDiagramModel:
         namespaces = self.get_namespaces(file_name)
         model = self.get_model(file_name, namespaces)

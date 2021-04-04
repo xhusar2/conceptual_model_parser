@@ -32,6 +32,7 @@ class VPActivityParser(ActivityDiagramParser):
         relations = self.parse_control_flows(model, namespaces)
         relations.update(self.parse_partition_relations(model, namespaces))
         relations.update(self.parse_object_flows(model, namespaces))
+        relations.update(self.parse_pin_relations(model, namespaces))
         return relations
 
     @staticmethod
@@ -91,7 +92,7 @@ class VPActivityParser(ActivityDiagramParser):
     def parse_forks_joins(self, model, namespaces):
         m_forks_joins = set()
         forks_joins = set(set(model.findall('.//ownedMember[@xmi:type="uml:Pseudostate"]', namespaces)) &
-                      set(model.findall('.//ownedMember[@kind="fork"]')))
+                          set(model.findall('.//ownedMember[@kind="fork"]')))
         forks_joins.update(set(set(model.findall('.//node[@xmi:type="uml:Pseudostate"]', namespaces)) &
                            set(model.findall('.//node[@kind="fork"]'))))
         forks_joins.update(set(set(model.findall('.//ownedMember[@xmi:type="uml:Pseudostate"]', namespaces)) &
@@ -206,10 +207,11 @@ class VPActivityParser(ActivityDiagramParser):
     @staticmethod
     def parse_pin_relations(model, namespaces):
         pin_relations = set()
-        actions = model.findall('.//node[@xmi:type="uml:Action"]', namespaces)
+        actions = set(model.findall('.//ownedMember[@xmi:type="uml:CallBehaviorAction"]', namespaces))
+        actions.update(model.findall('.//node[@xmi:type="uml:CallBehaviorAction"]', namespaces))
         for action in actions:
-            pins = action.findall('.//input[@xmi:type="uml:InputPin"]', namespaces)
-            pins.extend(action.findall('.//output[@xmi:type="uml:OutputPin"]', namespaces))
+            pins = set(action.findall('.//argument[@xmi:type="uml:InputPin"]', namespaces))
+            pins.update(action.findall('.//result[@xmi:type="uml:OutputPin"]', namespaces))
             for pin in pins:
                 rel_id = str(uuid.uuid4())
                 rel_target = pin.attrib["{" + namespaces['xmi'] + "}" + "id"]

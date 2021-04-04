@@ -107,7 +107,6 @@ class VPPackageParser(PackageDiagramParser):
     @staticmethod
     def get_packages(model, namespaces):
         packages = model.findall('.//ownedMember[@xmi:type="uml:Package"]', namespaces)
-        packages.extend(model.findall('.//ownedMember[@xmi:type="uml:Component"]', namespaces))
         packages.extend(model.findall('.//ownedMember[@xmi:type="uml:Model"]', namespaces))
         return packages
 
@@ -116,4 +115,4 @@ class VPPackageParser(PackageDiagramParser):
         if "{" + namespaces['xmi'] + "}" + "type" not in element.attrib:
             return False
         element_type = element.attrib["{" + namespaces['xmi'] + "}" + "type"]
-        return element_type == "uml:Package" or element_type == "uml:Model" or element_type == "uml:Component"
+        return element_type == "uml:Package" or element_type == "uml:Model"

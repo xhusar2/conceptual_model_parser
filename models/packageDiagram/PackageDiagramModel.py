@@ -10,17 +10,11 @@ class PackageDiagramModel(Model):
         self.relations = relations
         self.url = url
 
-    def get_neo4j_model(self):
-        nodes = self.get_nodes()
-        relations = self.get_relations()
-        return nodes, relations
-
     def get_nodes(self):
         nodes = {}
         for n in self.nodes:
             if n.node_type == "Package":
-                node = Package(_id=n.id, name=n.name, node_type=n.node_type, model_id=self.id, visibility=n.visibility,
-                               url=self.url)
+                node = Package(_id=n.id, name=n.name, node_type=n.node_type, model_id=self.id, visibility=n.visibility, url=self.url)
             else:
                 node = None
             if node is not None:

@@ -32,10 +32,13 @@ class EAPackageDiagramParser(PackageDiagramParser):
 
     @staticmethod
     def parse_package(package, namespaces):
-        node_id = package.attrib["{" + namespaces['xmi'] + "}" + "id"]
-        node_name = package.attrib["name"]
-        node_class = "Package"
-        node_visibility = package.attrib["visibility"]
+        try:
+            node_id = package.attrib["{" + namespaces['xmi'] + "}" + "id"]
+            node_name = package.attrib["name"]
+            node_class = "Package"
+            node_visibility = package.attrib["visibility"]
+        except Exception as exc:
+            raise AttributeError("Corrupted package node in source file") from exc
         return PackageNode(node_name, node_id, node_class, node_visibility)
 
     def parse_dependencies(self, model, namespaces):
@@ -47,10 +50,13 @@ class EAPackageDiagramParser(PackageDiagramParser):
 
     @staticmethod
     def parse_dependency(dependency, namespaces):
-        dependency_id = dependency.attrib["{" + namespaces['xmi'] + "}" + "id"]
-        dependency_target = dependency.attrib["supplier"]
-        dependency_source = dependency.attrib["client"]
-        dependency_type = "Dependency"
+        try:
+            dependency_id = dependency.attrib["{" + namespaces['xmi'] + "}" + "id"]
+            dependency_target = dependency.attrib["supplier"]
+            dependency_source = dependency.attrib["client"]
+            dependency_type = "Dependency"
+        except Exception as exc:
+            raise AttributeError("Corrupted dependency relation in source file") from exc
         return PackageRelation(dependency_id, dependency_source, dependency_target, dependency_type)
 
     def parse_merges(self, packages, namespaces):
@@ -64,10 +70,13 @@ class EAPackageDiagramParser(PackageDiagramParser):
 
     @staticmethod
     def parse_merge(package_merge, package, namespaces):
-        merge_id = package_merge.attrib["{" + namespaces['xmi'] + "}" + "id"]
-        merge_target = package_merge.attrib["mergedPackage"]
-        merge_source = package.attrib["{" + namespaces['xmi'] + "}" + "id"]
-        merge_type = "PackageMerge"
+        try:
+            merge_id = package_merge.attrib["{" + namespaces['xmi'] + "}" + "id"]
+            merge_target = package_merge.attrib["mergedPackage"]
+            merge_source = package.attrib["{" + namespaces['xmi'] + "}" + "id"]
+            merge_type = "PackageMerge"
+        except Exception as exc:
+            raise AttributeError("Corrupted package merge relation in source file") from exc
         return PackageRelation(merge_id, merge_source, merge_target, merge_type)
 
     def parse_imports(self, packages, namespaces):
@@ -81,10 +90,13 @@ class EAPackageDiagramParser(PackageDiagramParser):
 
     @staticmethod
     def parse_import(package_import, package, namespaces):
-        import_id = package_import.attrib["{" + namespaces['xmi'] + "}" + "id"]
-        import_target = package_import.attrib["importedPackage"]
-        import_source = package.attrib["{" + namespaces['xmi'] + "}" + "id"]
-        import_type = "PackageImport"
+        try:
+            import_id = package_import.attrib["{" + namespaces['xmi'] + "}" + "id"]
+            import_target = package_import.attrib["importedPackage"]
+            import_source = package.attrib["{" + namespaces['xmi'] + "}" + "id"]
+            import_type = "PackageImport"
+        except Exception as exc:
+            raise AttributeError("Corrupted package import relation in source file") from exc
         return PackageRelation(import_id, import_source, import_target, import_type)
 
     def parse_member_packages(self, packages, namespaces):
@@ -99,10 +111,13 @@ class EAPackageDiagramParser(PackageDiagramParser):
     @staticmethod
     def parse_member_package(child_package, package, namespaces):
         # need to generate unique id
-        member_id = str(uuid.uuid4())
-        member_target = package.attrib["{" + namespaces['xmi'] + "}" + "id"]
-        member_source = child_package.attrib["{" + namespaces['xmi'] + "}" + "id"]
-        member_type = "MemberOf"
+        try:
+            member_id = str(uuid.uuid4())
+            member_target = package.attrib["{" + namespaces['xmi'] + "}" + "id"]
+            member_source = child_package.attrib["{" + namespaces['xmi'] + "}" + "id"]
+            member_type = "MemberOf"
+        except Exception as exc:
+            raise AttributeError("Corrupted package node or one of its child package nodes in source file") from exc
         return PackageRelation(member_id, member_source, member_target, member_type)
 
     def parse_usages(self, model, namespaces):
@@ -114,14 +129,20 @@ class EAPackageDiagramParser(PackageDiagramParser):
 
     @staticmethod
     def parse_usage(usage, namespaces):
-        usage_id = usage.attrib["{" + namespaces['xmi'] + "}" + "id"]
-        usage_target = usage.attrib["supplier"]
-        usage_source = usage.attrib["client"]
-        rel_type = "Usage"
+        try:
+            usage_id = usage.attrib["{" + namespaces['xmi'] + "}" + "id"]
+            usage_target = usage.attrib["supplier"]
+            usage_source = usage.attrib["client"]
+            rel_type = "Usage"
+        except Exception as exc:
+            raise AttributeError("Corrupted usage relation in source file") from exc
         return PackageRelation(usage_id, usage_source, usage_target, rel_type)
 
     def get_model(self, file_name, namespaces):
-        return etree.parse(file_name).getroot().find('uml:Model', namespaces)
+        model = etree.parse(file_name).getroot().find('uml:Model', namespaces)
+        if model is None:
+            raise AttributeError("Corrupted source file, no model found")
+        return model
 
     @staticmethod
     def get_packages(model, namespaces):
