@@ -8,16 +8,26 @@ import uuid
 class EAPackageDiagramParser(PackageDiagramParser):
 
     def parse_nodes(self, model, namespaces):
-        nodes = self.parse_packages(model, namespaces)
+        try:
+            nodes = self.parse_packages(model, namespaces)
+        except AttributeError as exc:
+            raise exc
+        except Exception as exc:
+            raise Exception("Corrupted model in source file") from exc
         return nodes
 
     def parse_relations(self, model, namespaces):
-        packages = self.get_packages(model, namespaces)
-        relations = self.parse_dependencies(model, namespaces)
-        relations.update(self.parse_merges(packages, namespaces))
-        relations.update(self.parse_imports(packages, namespaces))
-        relations.update(self.parse_member_packages(packages, namespaces))
-        relations.update(self.parse_usages(model, namespaces))
+        try:
+            packages = self.get_packages(model, namespaces)
+            relations = self.parse_dependencies(model, namespaces)
+            relations.update(self.parse_merges(packages, namespaces))
+            relations.update(self.parse_imports(packages, namespaces))
+            relations.update(self.parse_member_packages(packages, namespaces))
+            relations.update(self.parse_usages(model, namespaces))
+        except AttributeError as exc:
+            raise exc
+        except Exception as exc:
+            raise Exception("Corrupted model in source file") from exc
         return relations
 
     def parse_id(self, model, namespaces):

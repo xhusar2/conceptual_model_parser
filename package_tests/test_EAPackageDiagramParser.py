@@ -14,11 +14,9 @@ class TestEAPackageDiagramParser(unittest.TestCase):
 
     def test_get_namespaces(self):
         namespaces = self.parser.get_namespaces(self.test_file)
-        self.assertEqual(len(namespaces), 3)
-        keys = list(namespaces.keys())
-        self.assertEqual(keys[0], 'uml')
-        self.assertEqual(keys[1], 'xmi')
-        self.assertEqual(keys[2], 'EAUML')
+        self.assertGreaterEqual(len(namespaces), 2)
+        self.assertTrue("xmi" in namespaces)
+        self.assertTrue("uml" in namespaces)
 
     def test_get_model(self):
         model = self.parser.get_model(self.test_file, self.namespaces)
@@ -108,21 +106,38 @@ class TestEAPackageDiagramParser(unittest.TestCase):
         self.assertEqual(len(merges), 1)
 
     def test_parse_merges_type(self):
-        merges = self.parser.parse_merges(self.model, self.namespaces)
+        packages = self.parser.get_packages(self.model, self.namespaces)
+        merges = self.parser.parse_merges(packages, self.namespaces)
         for merge in merges:
             self.assertEqual(merge.relation_type, "PackageMerge")
 
     def test_parse_merge_type(self):
-        pass
+        package = self.parser.get_packages(self.model, self.namespaces)[5]
+        merges = list(set(package.findall('.//packageMerge[@xmi:type="uml:PackageMerge"]', self.namespaces)) &
+                      set(package.getchildren()))
+        parsed_merge = self.parser.parse_merge(merges[0], package, self.namespaces)
+        self.assertEqual(parsed_merge.relation_type, "PackageMerge")
 
     def test_parse_merge_id(self):
-        pass
+        package = self.parser.get_packages(self.model, self.namespaces)[5]
+        merges = list(set(package.findall('.//packageMerge[@xmi:type="uml:PackageMerge"]', self.namespaces)) &
+                      set(package.getchildren()))
+        parsed_merge = self.parser.parse_merge(merges[0], package, self.namespaces)
+        self.assertEqual(parsed_merge.id, "EAID_B2CCAD6C_EB46_4adf_9620_E763739AA84A")
 
     def test_parse_merge_source(self):
-        pass
+        package = self.parser.get_packages(self.model, self.namespaces)[5]
+        merges = list(set(package.findall('.//packageMerge[@xmi:type="uml:PackageMerge"]', self.namespaces)) &
+                      set(package.getchildren()))
+        parsed_merge = self.parser.parse_merge(merges[0], package, self.namespaces)
+        self.assertEqual(parsed_merge.source, "EAPK_90C0EA89_B767_4128_B044_5B4F4DB28599")
 
     def test_parse_merge_target(self):
-        pass
+        package = self.parser.get_packages(self.model, self.namespaces)[5]
+        merges = list(set(package.findall('.//packageMerge[@xmi:type="uml:PackageMerge"]', self.namespaces)) &
+                      set(package.getchildren()))
+        parsed_merge = self.parser.parse_merge(merges[0], package, self.namespaces)
+        self.assertEqual(parsed_merge.target, "EAPK_948CB355_7F8A_4679_AC47_CA3A4D4EEBF3")
 
     def test_parse_imports_count(self):
         packages = self.parser.get_packages(self.model, self.namespaces)
@@ -136,16 +151,32 @@ class TestEAPackageDiagramParser(unittest.TestCase):
             self.assertEqual(type(m_import), PackageRelation)
 
     def test_parse_import_type(self):
-        pass
+        package = self.parser.get_packages(self.model, self.namespaces)[4]
+        imports = list(set(package.findall('.//packageImport[@xmi:type="uml:PackageImport"]', self.namespaces)) &
+                       set(package.getchildren()))
+        import_e = self.parser.parse_import(imports[0], package, self.namespaces)
+        self.assertEqual(import_e.relation_type, "PackageImport")
 
     def test_parse_import_id(self):
-        pass
+        package = self.parser.get_packages(self.model, self.namespaces)[4]
+        imports = list(set(package.findall('.//packageImport[@xmi:type="uml:PackageImport"]', self.namespaces)) &
+                       set(package.getchildren()))
+        import_e = self.parser.parse_import(imports[0], package, self.namespaces)
+        self.assertEqual(import_e.id, "EAID_344093C1_69D7_458d_9D42_A3E09A2141F2")
 
     def test_parse_import_source(self):
-        pass
+        package = self.parser.get_packages(self.model, self.namespaces)[4]
+        imports = list(set(package.findall('.//packageImport[@xmi:type="uml:PackageImport"]', self.namespaces)) &
+                       set(package.getchildren()))
+        import_e = self.parser.parse_import(imports[0], package, self.namespaces)
+        self.assertEqual(import_e.source, "EAPK_948CB355_7F8A_4679_AC47_CA3A4D4EEBF3")
 
     def test_parse_import_target(self):
-        pass
+        package = self.parser.get_packages(self.model, self.namespaces)[4]
+        imports = list(set(package.findall('.//packageImport[@xmi:type="uml:PackageImport"]', self.namespaces)) &
+                       set(package.getchildren()))
+        import_e = self.parser.parse_import(imports[0], package, self.namespaces)
+        self.assertEqual(import_e.target, "EAPK_7E93196F_BBC1_4bba_9DE9_F435E7654DF0")
 
     def test_parse_import_empty(self):
         package = self.parser.get_packages(self.model, self.namespaces)[0]
@@ -157,11 +188,23 @@ class TestEAPackageDiagramParser(unittest.TestCase):
         with self.assertRaises(AttributeError):
             self.parser.parse_import("error", package, self.namespaces)
 
-    def test_parse_member_packages(self):
-        pass
+    def test_parse_member_packages_count(self):
+        packages = self.parser.get_packages(self.model, self.namespaces)
+        members = self.parser.parse_member_packages(packages, self.namespaces)
+        self.assertEqual(len(members), 9)
 
-    def test_parse_member_package(self):
-        pass
+    def test_parse_member_packages_type(self):
+        packages = self.parser.get_packages(self.model, self.namespaces)
+        members = self.parser.parse_member_packages(packages, self.namespaces)
+        for member in members:
+            self.assertEqual(type(member), PackageRelation)
+
+    def test_parse_member_package_type(self):
+        package = self.parser.get_packages(self.model, self.namespaces)[0]
+        members = list(set(package.findall('.//packagedElement[@xmi:type="uml:Package"]', self.namespaces)) &
+                       set(package.getchildren()))
+        parsed_member = self.parser.parse_member_package(members[0], package, self.namespaces)
+        self.assertEqual(parsed_member.relation_type, "MemberOf")
 
     def test_parse_usages_count(self):
         usages = self.parser.parse_usages(self.model, self.namespaces)
@@ -213,7 +256,7 @@ class TestEAPackageDiagramParser(unittest.TestCase):
         ids = set()
         for node in nodes:
             ids.add(node.id)
-        self.assertEqual(len(ids), 10)
+        self.assertEqual(len(ids), len(nodes))
 
     def test_parse_nodes_type(self):
         nodes = self.parser.parse_nodes(self.model, self.namespaces)
@@ -229,10 +272,9 @@ class TestEAPackageDiagramParser(unittest.TestCase):
         ids = set()
         for relation in relations:
             ids.add(relation.id)
-        self.assertEqual(len(ids), 14)
+        self.assertEqual(len(ids), len(relations))
 
     def test_parse_relations_type(self):
         relations = self.parser.parse_relations(self.model, self.namespaces)
         for relation in relations:
             self.assertEqual(type(relation), PackageRelation)
-

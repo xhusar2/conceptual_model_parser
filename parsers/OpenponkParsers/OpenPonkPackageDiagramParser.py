@@ -7,13 +7,23 @@ import uuid
 
 class OpenPonkPackageDiagramParser(PackageDiagramParser):
     def parse_nodes(self, model, namespaces):
-        m_nodes = self.parse_packages(model, namespaces)
+        try:
+            m_nodes = self.parse_packages(model, namespaces)
+        except AttributeError as exc:
+            raise exc
+        except Exception as exc:
+            raise Exception("Corrupted model in source file") from exc
         return m_nodes
 
     def parse_relations(self, model, namespaces):
-        packages = self.get_packages(model, namespaces)
-        m_relations = self.parse_imports(packages, namespaces)
-        m_relations.update(self.parse_member_packages(packages, namespaces))
+        try:
+            packages = self.get_packages(model, namespaces)
+            m_relations = self.parse_imports(packages, namespaces)
+            m_relations.update(self.parse_member_packages(packages, namespaces))
+        except AttributeError as exc:
+            raise exc
+        except Exception as exc:
+            raise Exception("Corrupted model in source file") from exc
         return m_relations
 
     def parse_id(self, model, namespaces):
@@ -28,13 +38,16 @@ class OpenPonkPackageDiagramParser(PackageDiagramParser):
 
     @staticmethod
     def parse_package(package, namespaces):
-        node_id = package.attrib["{" + namespaces['xmi'] + "}" + "id"]
-        node_name = package.attrib["name"]
-        node_class = "Package"
-        if 'visibility' in package.attrib:
-            node_visibility = package.attrib["visibility"]
-        else:
-            node_visibility = "public"
+        try:
+            node_id = package.attrib["{" + namespaces['xmi'] + "}" + "id"]
+            node_name = package.attrib["name"]
+            node_class = "Package"
+            if 'visibility' in package.attrib:
+                node_visibility = package.attrib["visibility"]
+            else:
+                node_visibility = "public"
+        except Exception as exc:
+            raise AttributeError("Corrupted package node in source file") from exc
         return PackageNode(node_name, node_id, node_class, node_visibility)
 
     def parse_imports(self, packages, namespaces):
@@ -46,31 +59,36 @@ class OpenPonkPackageDiagramParser(PackageDiagramParser):
                 m_imports.add(self.parse_import(child, package, namespaces))
         return m_imports
 
-    # TODO refactor finding one (find) element
     @staticmethod
     def parse_import(package_import, package, namespaces):
-        import_id = package_import.attrib["{" + namespaces['xmi'] + "}" + "id"]
-        import_target = package_import.find(".//importedPackage").attrib["{" + namespaces['xmi'] + "}" + "idref"]
-        import_source = package.attrib["{" + namespaces['xmi'] + "}" + "id"]
-        import_type = "PackageImport"
+        try:
+            import_id = package_import.attrib["{" + namespaces['xmi'] + "}" + "id"]
+            import_target = package_import.find(".//importedPackage").attrib["{" + namespaces['xmi'] + "}" + "idref"]
+            import_source = package.attrib["{" + namespaces['xmi'] + "}" + "id"]
+            import_type = "PackageImport"
+        except Exception as exc:
+            raise AttributeError("Corrupted import relation in source file") from exc
         return PackageRelation(import_id, import_source, import_target, import_type)
 
     def parse_member_packages(self, packages, namespaces):
-        m_member_of = set()
+        m_members_of = set()
         for package in packages:
             children = package.getchildren()
             for child in children:
                 if self.is_package(child, namespaces):
-                    m_member_of.add(self.parse_member_package(child, package, namespaces))
-        return m_member_of
+                    m_members_of.add(self.parse_member_package(child, package, namespaces))
+        return m_members_of
 
     @staticmethod
     def parse_member_package(member_package, package, namespaces):
-        # generate universal unique id
-        member_id = str(uuid.uuid4())
-        member_source = member_package.attrib["{" + namespaces['xmi'] + "}" + "id"]
-        member_target = package.attrib["{" + namespaces['xmi'] + "}" + "id"]
-        member_type = "MemberOf"
+        try:
+            # generate universal unique id
+            member_id = str(uuid.uuid4())
+            member_source = member_package.attrib["{" + namespaces['xmi'] + "}" + "id"]
+            member_target = package.attrib["{" + namespaces['xmi'] + "}" + "id"]
+            member_type = "MemberOf"
+        except Exception as exc:
+            raise AttributeError("Corrupted package node or one of his child package node in source file") from exc
         return PackageRelation(member_id, member_source, member_target, member_type)
 
     def get_model(self, file_name, namespaces):

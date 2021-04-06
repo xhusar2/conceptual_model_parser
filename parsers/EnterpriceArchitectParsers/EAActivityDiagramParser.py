@@ -41,7 +41,7 @@ class EAActDiagramParser(ActivityDiagramParser):
 
     # TODO rename
     @staticmethod
-    def parse_node(node, namespaces, n_type):
+    def parse_activity_node(node, namespaces, n_type):
         node_id = node.attrib["{" + namespaces['xmi'] + "}" + "id"]
         if 'name' in node.attrib:
             node_name = node.attrib["name"]
@@ -60,49 +60,49 @@ class EAActDiagramParser(ActivityDiagramParser):
         m_actions = set()
         actions = model.findall('.//node[@xmi:type="uml:Action"]', namespaces)
         for action in actions:
-            m_actions.add(self.parse_node(action, namespaces, "Action"))
+            m_actions.add(self.parse_activity_node(action, namespaces, "Action"))
         return m_actions
 
     def parse_initial_nodes(self, model, namespaces):
         m_initials = set()
         initials = model.findall('.//node[@xmi:type="uml:InitialNode"]', namespaces)
         for initial in initials:
-            m_initials.add(self.parse_node(initial, namespaces, "Initial"))
+            m_initials.add(self.parse_activity_node(initial, namespaces, "Initial"))
         return m_initials
 
     def parse_activity_finals(self, model, namespaces):
         m_finals = set()
         finals = model.findall('.//node[@xmi:type="uml:ActivityFinalNode"]', namespaces)
         for final in finals:
-            m_finals.add(self.parse_node(final, namespaces, "ActivityFinal"))
+            m_finals.add(self.parse_activity_node(final, namespaces, "ActivityFinal"))
         return m_finals
 
     def parse_flow_finals(self, model, namespaces):
         m_flow_finals = set()
         f_finals = model.findall('.//node[@xmi:type="uml:FlowFinalNode"]', namespaces)
         for f_final in f_finals:
-            m_flow_finals.add(self.parse_node(f_final, namespaces, "FlowFinal"))
+            m_flow_finals.add(self.parse_activity_node(f_final, namespaces, "FlowFinal"))
         return m_flow_finals
 
     def parse_forks_joins(self, model, namespaces):
         m_forks = set()
         forks = model.findall('.//node[@xmi:type="uml:ForkNode"]', namespaces)
         for fork in forks:
-            m_forks.add(self.parse_node(fork, namespaces, "ForkJoin"))
+            m_forks.add(self.parse_activity_node(fork, namespaces, "ForkJoin"))
         return m_forks
 
     def parse_decisions_merges(self, model, namespaces):
         m_decisions = set()
         decisions = model.findall('.//node[@xmi:type="uml:DecisionNode"]', namespaces)
         for decision in decisions:
-            m_decisions.add(self.parse_node(decision, namespaces, "DecisionMerge"))
+            m_decisions.add(self.parse_activity_node(decision, namespaces, "DecisionMerge"))
         return m_decisions
 
     def parse_central_buffers(self, model, namespaces):
         m_buffer = set()
         buffers = model.findall('.//node[@xmi:type="uml:CentralBufferNode"]', namespaces)
         for buffer in buffers:
-            m_buffer.add(self.parse_node(buffer, namespaces, "CentralBuffer"))
+            m_buffer.add(self.parse_activity_node(buffer, namespaces, "CentralBuffer"))
         return m_buffer
 
     @staticmethod
@@ -136,7 +136,7 @@ class EAActDiagramParser(ActivityDiagramParser):
         m_partitions = set()
         partitions = model.findall('.//group[@xmi:type="uml:ActivityPartition"]', namespaces)
         for partition in partitions:
-            m_partitions.add(self.parse_node(partition, namespaces, "Partition"))
+            m_partitions.add(self.parse_activity_node(partition, namespaces, "Partition"))
         return m_partitions
 
     def parse_partition_relations(self, model, namespaces):
@@ -167,34 +167,34 @@ class EAActDiagramParser(ActivityDiagramParser):
         m_input_pins = set()
         input_pins = model.findall('.//input[@xmi:type="uml:InputPin"]', namespaces)
         for pin in input_pins:
-            m_input_pins.add(self.parse_node(pin, namespaces, "InputPin"))
+            m_input_pins.add(self.parse_activity_node(pin, namespaces, "InputPin"))
         return m_input_pins
 
     def parse_output_pins(self, model, namespaces):
         m_output_pins = set()
         output_pins = model.findall('.//output[@xmi:type="uml:OutputPin"]', namespaces)
         for pin in output_pins:
-            m_output_pins.add(self.parse_node(pin, namespaces, "OutputPin"))
+            m_output_pins.add(self.parse_activity_node(pin, namespaces, "OutputPin"))
         return m_output_pins
 
     def parse_instance_specifications(self, model, namespaces):
         m_objects = set()
         instance_specifications = model.findall('.//packagedElement[@xmi:type="uml:InstanceSpecification"]', namespaces)
         for instance in instance_specifications:
-            m_objects.add(self.parse_node(instance, namespaces, "Object"))
+            m_objects.add(self.parse_activity_node(instance, namespaces, "Object"))
         return m_objects
 
     def parse_data_stores(self, model, namespaces):
         m_data_stores = set()
         data_stores = model.findall('.//node[@xmi:type="uml:DataStoreNode"]', namespaces)
         for data_store in data_stores:
-            m_data_stores.add(self.parse_node(data_store, namespaces, "DataStore"))
+            m_data_stores.add(self.parse_activity_node(data_store, namespaces, "DataStore"))
         return m_data_stores
 
     # TODO refactor
     @staticmethod
     def parse_pin_relations(model, namespaces):
-        pin_relations = []
+        pin_relations = set()
         actions = model.findall('.//node[@xmi:type="uml:Action"]', namespaces)
         for action in actions:
             pins = action.findall('.//input[@xmi:type="uml:InputPin"]', namespaces)
@@ -205,5 +205,5 @@ class EAActDiagramParser(ActivityDiagramParser):
                 rel_source = action.attrib["{" + namespaces['xmi'] + "}" + "id"]
                 rel_type = "HasPin"
                 m_rel = ActivityRelation(rel_id, rel_source, rel_target, rel_type)
-                pin_relations.append(m_rel)
+                pin_relations.add(m_rel)
         return pin_relations
