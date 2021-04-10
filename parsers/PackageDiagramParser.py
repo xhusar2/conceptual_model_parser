@@ -1,12 +1,13 @@
 from models.packageDiagram.PackageDiagramModel import PackageDiagramModel
+from models.packageDiagram.PackageNode import PackageNode
 from parsers.DiagramParser import DiagramParser
 from lxml import etree
 
 
 class PackageDiagramParser(DiagramParser):
-    def parse_file(self, file_name: str) -> PackageDiagramModel:
-        namespaces = self.get_namespaces(file_name)
-        model = self.get_model(file_name, namespaces)
+    def parse_file(self, file_path: str) -> PackageDiagramModel:
+        namespaces = self.get_namespaces(file_path)
+        model = self.get_model(file_path, namespaces)
         return self.parse_model(model, namespaces)
 
     def parse_model(self, model, namespaces):
@@ -46,8 +47,8 @@ class PackageDiagramParser(DiagramParser):
         pass
 
     @staticmethod
-    def get_namespaces(file_name):
-        namespaces = etree.parse(file_name).getroot().nsmap
+    def get_namespaces(file_path):
+        namespaces = etree.parse(file_path).getroot().nsmap
         if namespaces is None or "uml" not in namespaces or "xmi" not in namespaces:
             raise AttributeError("Corrupted source file, required namespaces are missing")
         return namespaces

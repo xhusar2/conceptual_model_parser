@@ -28,7 +28,6 @@ class EAActDiagramParser(ActivityDiagramParser):
         nodes.update(self.parse_partitions(model, namespaces))
         nodes.update(self.parse_central_buffers(model, namespaces))
         nodes.update(self.parse_pins(model, namespaces))
-        nodes.update(self.parse_instance_specifications(model, namespaces))
         nodes.update(self.parse_data_stores(model, namespaces))
         return nodes
 
@@ -176,13 +175,6 @@ class EAActDiagramParser(ActivityDiagramParser):
         for pin in output_pins:
             m_output_pins.add(self.parse_activity_node(pin, namespaces, "OutputPin"))
         return m_output_pins
-
-    def parse_instance_specifications(self, model, namespaces):
-        m_objects = set()
-        instance_specifications = model.findall('.//packagedElement[@xmi:type="uml:InstanceSpecification"]', namespaces)
-        for instance in instance_specifications:
-            m_objects.add(self.parse_activity_node(instance, namespaces, "Object"))
-        return m_objects
 
     def parse_data_stores(self, model, namespaces):
         m_data_stores = set()
