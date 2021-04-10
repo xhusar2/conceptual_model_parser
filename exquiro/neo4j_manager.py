@@ -22,6 +22,7 @@ class Neo4jManager():
         neo_db.cypher_query(f'MATCH (n)-[r]-() WHERE n.model_id = \'{model_id}\' DETACH DELETE r')
         neo_db.cypher_query(f'MATCH (n) WHERE n.model_id = \'{model_id}\' DETACH DELETE n')
 
+    #TODO check nodes in relations exists
     @staticmethod
     def add_model(model):
         nodes, relations = model.get_neo4j_model()
@@ -33,8 +34,9 @@ class Neo4jManager():
             rel_dest = r[1]
             rel_props = r[2]
             rel_attrib = r[3]
-            src = nodes[rel_source]
-            dest = nodes[rel_dest]
-            getattr(src, rel_attrib).connect(dest, rel_props)
+            if rel_source in nodes and rel_dest in nodes:
+                src = nodes[rel_source]
+                dest = nodes[rel_dest]
+                getattr(src, rel_attrib).connect(dest, rel_props)
 
 
