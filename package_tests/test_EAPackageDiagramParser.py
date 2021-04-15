@@ -278,3 +278,13 @@ class TestEAPackageDiagramParser(unittest.TestCase):
         relations = self.parser.parse_relations(self.model, self.namespaces)
         for relation in relations:
             self.assertEqual(type(relation), PackageRelation)
+
+    def test_unique_ids(self):
+        relations = self.parser.parse_relations(self.model, self.namespaces)
+        nodes = self.parser.parse_nodes(self.model, self.namespaces)
+        ids = set()
+        for relation in relations:
+            ids.add(relation.id)
+        for node in nodes:
+            ids.add(node.id)
+        self.assertEqual(len(ids), len(relations) + len(nodes))

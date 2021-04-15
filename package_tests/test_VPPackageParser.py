@@ -235,3 +235,13 @@ class TestEAPackageDiagramParser(unittest.TestCase):
     def test_is_package_relation(self):
         relation = self.model.findall('.//ownedMember[@xmi:type="uml:Dependency"]', self.namespaces)[0]
         self.assertFalse(self.parser.is_package(relation, self.namespaces))
+
+    def test_unique_ids(self):
+        relations = self.parser.parse_relations(self.model, self.namespaces)
+        nodes = self.parser.parse_nodes(self.model, self.namespaces)
+        ids = set()
+        for relation in relations:
+            ids.add(relation.id)
+        for node in nodes:
+            ids.add(node.id)
+        self.assertEqual(len(ids), len(relations) + len(nodes))

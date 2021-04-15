@@ -78,7 +78,7 @@ class ActivityNode(ActivityDiagramNode):
     type = StringProperty()
     visibility = StringProperty()
     name = StringProperty()
-    PartitionMember = Relationship("Partition", "partitionMember", model=RelationModel)
+    PartitionMember = Relationship("ActivityPartition", "partitionMember", model=RelationModel)
 
 
 class ControlFlowNode(ActivityNode):
@@ -91,6 +91,7 @@ class ActivityPartition(ActivityDiagramNode):
     type = StringProperty()
     visibility = StringProperty()
     name = StringProperty()
+    PartitionMember = Relationship("ActivityPartition", "partitionMember", model=RelationModel)
 
 
 class ObjectNode(ActivityNode):

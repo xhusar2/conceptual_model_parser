@@ -7,53 +7,59 @@ import uuid
 
 class EAActDiagramParser(ActivityDiagramParser):
     def parse_id(self, model, namespaces):
-        packaged_element = model.find('./packagedElement', namespaces)
-        if packaged_element is not None:
-            return packaged_element.attrib['{' + namespaces['xmi'] + '}' + 'id']
-        id_attrib = '{' + namespaces['xmi'] + '}' + ':id'
-        if id_attrib in model.attrib:
-            return model.attrib[id_attrib]
-        return ""
+        return str(uuid.uuid4())
 
     def get_model(self, file_name, namespaces):
         return etree.parse(file_name).getroot().find('uml:Model', namespaces)
 
     def parse_nodes(self, model, namespaces):
-        nodes = self.parse_actions(model, namespaces)
-        nodes.update(self.parse_activity_finals(model, namespaces))
-        nodes.update(self.parse_initial_nodes(model, namespaces))
-        nodes.update(self.parse_forks_joins(model, namespaces))
-        nodes.update(self.parse_flow_finals(model, namespaces))
-        nodes.update(self.parse_decisions_merges(model, namespaces))
-        nodes.update(self.parse_partitions(model, namespaces))
-        nodes.update(self.parse_central_buffers(model, namespaces))
-        nodes.update(self.parse_pins(model, namespaces))
-        nodes.update(self.parse_data_stores(model, namespaces))
-        return nodes
+        try:
+            nodes = self.parse_actions(model, namespaces)
+            nodes.update(self.parse_activity_finals(model, namespaces))
+            nodes.update(self.parse_initial_nodes(model, namespaces))
+            nodes.update(self.parse_forks_joins(model, namespaces))
+            nodes.update(self.parse_flow_finals(model, namespaces))
+            nodes.update(self.parse_decisions_merges(model, namespaces))
+            nodes.update(self.parse_partitions(model, namespaces))
+            nodes.update(self.parse_central_buffers(model, namespaces))
+            nodes.update(self.parse_pins(model, namespaces))
+            nodes.update(self.parse_data_stores(model, namespaces))
+            return nodes
+        except AttributeError as exc:
+            raise exc
+        except Exception as exc:
+            raise Exception("Corrupted model in source file") from exc
 
     def parse_relations(self, model, namespaces):
-        relations = self.parse_control_flows(model, namespaces)
-        relations.update(self.parse_object_flows(model, namespaces))
-        relations.update(self.parse_partition_relations(model, namespaces))
-        relations.update(self.parse_pin_relations(model, namespaces))
-        return relations
+        try:
+            relations = self.parse_control_flows(model, namespaces)
+            relations.update(self.parse_object_flows(model, namespaces))
+            relations.update(self.parse_partition_relations(model, namespaces))
+            relations.update(self.parse_pin_relations(model, namespaces))
+            return relations
+        except AttributeError as exc:
+            raise exc
+        except Exception as exc:
+            raise Exception("Corrupted model in source file") from exc
 
-    # TODO rename
     @staticmethod
     def parse_activity_node(node, namespaces, n_type):
-        node_id = node.attrib["{" + namespaces['xmi'] + "}" + "id"]
-        if 'name' in node.attrib:
-            node_name = node.attrib["name"]
-        else:
-            node_name = None
-        if 'ordering' in node.attrib:
-            node_ordering = node.attrib["ordering"]
-        else:
-            node_ordering = None
-        node_type = n_type
-        node_visibility = node.attrib["visibility"]
-        return ActivityNode(name=node_name, node_id=node_id, node_type=node_type, visibility=node_visibility,
-                            ordering=node_ordering)
+        try:
+            node_id = node.attrib["{" + namespaces['xmi'] + "}" + "id"]
+            if 'name' in node.attrib and node.attrib['name'] is not "":
+                node_name = node.attrib["name"]
+            else:
+                node_name = None
+            if 'ordering' in node.attrib:
+                node_ordering = node.attrib["ordering"]
+            else:
+                node_ordering = None
+            node_type = n_type
+            node_visibility = node.attrib["visibility"]
+            return ActivityNode(name=node_name, node_id=node_id, node_type=node_type, visibility=node_visibility,
+                                ordering=node_ordering)
+        except Exception as exc:
+            raise AttributeError("Corrupted activity node in source file: type " + n_type) from exc
 
     def parse_actions(self, model, namespaces):
         m_actions = set()
@@ -92,7 +98,8 @@ class EAActDiagramParser(ActivityDiagramParser):
 
     def parse_decisions_merges(self, model, namespaces):
         m_decisions = set()
-        decisions = model.findall('.//node[@xmi:type="uml:DecisionNode"]', namespaces)
+        decisions = set(model.findall('.//node[@xmi:type="uml:DecisionNode"]', namespaces))
+        decisions.update(model.findall('.//node[@xmi:type="uml:MergeNode"]', namespaces))
         for decision in decisions:
             m_decisions.add(self.parse_activity_node(decision, namespaces, "DecisionMerge"))
         return m_decisions
@@ -106,16 +113,19 @@ class EAActDiagramParser(ActivityDiagramParser):
 
     @staticmethod
     def parse_flow_relation(flow, namespaces, rel_type):
-        guard = flow.find('.//guard[@xmi:type="uml:OpaqueExpression"]', namespaces)
-        if guard is not None and 'body' in guard.attrib:
-            relation_guard = guard.attrib["body"]
-        else:
-            relation_guard = None
-        relation_id = flow.attrib["{" + namespaces['xmi'] + "}" + "id"]
-        relation_target = flow.attrib["target"]
-        relation_source = flow.attrib["source"]
-        relation_type = rel_type
-        return ActivityRelation(relation_id, relation_source, relation_target, relation_type, relation_guard)
+        try:
+            guard = flow.find('.//guard[@xmi:type="uml:OpaqueExpression"]', namespaces)
+            if guard is not None and 'body' in guard.attrib:
+                relation_guard = guard.attrib["body"]
+            else:
+                relation_guard = None
+            relation_id = flow.attrib["{" + namespaces['xmi'] + "}" + "id"]
+            relation_target = flow.attrib["target"]
+            relation_source = flow.attrib["source"]
+            relation_type = rel_type
+            return ActivityRelation(relation_id, relation_source, relation_target, relation_type, relation_guard)
+        except Exception as exc:
+            raise AttributeError("Corrupted relation in source file: type " + rel_type) from exc
 
     def parse_control_flows(self, model, namespaces):
         m_control_flows = set()
@@ -149,12 +159,15 @@ class EAActDiagramParser(ActivityDiagramParser):
 
     @staticmethod
     def parse_partition_relation(child, partition, namespaces):
-        # need to generate unique id
-        rel_id = str(uuid.uuid4())
-        rel_source = child.attrib["{" + namespaces['xmi'] + "}" + "idref"]
-        rel_target = partition.attrib["{" + namespaces['xmi'] + "}" + "id"]
-        rel_type = "PartitionMember"
-        return ActivityRelation(rel_id, rel_source, rel_target, rel_type)
+        try:
+            # need to generate unique id
+            rel_id = str(uuid.uuid4())
+            rel_source = child.attrib["{" + namespaces['xmi'] + "}" + "idref"]
+            rel_target = partition.attrib["{" + namespaces['xmi'] + "}" + "id"]
+            rel_type = "PartitionMember"
+            return ActivityRelation(rel_id, rel_source, rel_target, rel_type)
+        except Exception as exc:
+            raise AttributeError("Corrupted partition or one of its member in source file") from exc
 
     def parse_pins(self, model, namespaces):
         m_pins = set()
@@ -183,19 +196,21 @@ class EAActDiagramParser(ActivityDiagramParser):
             m_data_stores.add(self.parse_activity_node(data_store, namespaces, "DataStore"))
         return m_data_stores
 
-    # TODO refactor
     @staticmethod
     def parse_pin_relations(model, namespaces):
-        pin_relations = set()
-        actions = model.findall('.//node[@xmi:type="uml:Action"]', namespaces)
-        for action in actions:
-            pins = action.findall('.//input[@xmi:type="uml:InputPin"]', namespaces)
-            pins.extend(action.findall('.//output[@xmi:type="uml:OutputPin"]', namespaces))
-            for pin in pins:
-                rel_id = str(uuid.uuid4())
-                rel_target = pin.attrib["{" + namespaces['xmi'] + "}" + "id"]
-                rel_source = action.attrib["{" + namespaces['xmi'] + "}" + "id"]
-                rel_type = "HasPin"
-                m_rel = ActivityRelation(rel_id, rel_source, rel_target, rel_type)
-                pin_relations.add(m_rel)
-        return pin_relations
+        try:
+            pin_relations = set()
+            actions = model.findall('.//node[@xmi:type="uml:Action"]', namespaces)
+            for action in actions:
+                pins = action.findall('.//input[@xmi:type="uml:InputPin"]', namespaces)
+                pins.extend(action.findall('.//output[@xmi:type="uml:OutputPin"]', namespaces))
+                for pin in pins:
+                    rel_id = str(uuid.uuid4())
+                    rel_target = pin.attrib["{" + namespaces['xmi'] + "}" + "id"]
+                    rel_source = action.attrib["{" + namespaces['xmi'] + "}" + "id"]
+                    rel_type = "HasPin"
+                    m_rel = ActivityRelation(rel_id, rel_source, rel_target, rel_type)
+                    pin_relations.add(m_rel)
+            return pin_relations
+        except Exception as exc:
+            raise AttributeError("Corrupted pin node or action node in source file") from exc

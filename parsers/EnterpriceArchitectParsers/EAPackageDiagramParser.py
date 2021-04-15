@@ -10,11 +10,11 @@ class EAPackageDiagramParser(PackageDiagramParser):
     def parse_nodes(self, model, namespaces):
         try:
             nodes = self.parse_packages(model, namespaces)
+            return nodes
         except AttributeError as exc:
             raise exc
         except Exception as exc:
             raise Exception("Corrupted model in source file") from exc
-        return nodes
 
     def parse_relations(self, model, namespaces):
         try:
@@ -47,9 +47,9 @@ class EAPackageDiagramParser(PackageDiagramParser):
             node_name = package.attrib["name"]
             node_class = "Package"
             node_visibility = package.attrib["visibility"]
+            return PackageNode(node_name, node_id, node_class, node_visibility)
         except Exception as exc:
             raise AttributeError("Corrupted package node in source file") from exc
-        return PackageNode(node_name, node_id, node_class, node_visibility)
 
     def parse_dependencies(self, model, namespaces):
         m_dependencies = set()
@@ -65,9 +65,9 @@ class EAPackageDiagramParser(PackageDiagramParser):
             dependency_target = dependency.attrib["supplier"]
             dependency_source = dependency.attrib["client"]
             dependency_type = "Dependency"
+            return PackageRelation(dependency_id, dependency_source, dependency_target, dependency_type)
         except Exception as exc:
             raise AttributeError("Corrupted dependency relation in source file") from exc
-        return PackageRelation(dependency_id, dependency_source, dependency_target, dependency_type)
 
     def parse_merges(self, packages, namespaces):
         m_merges = set()
@@ -85,9 +85,9 @@ class EAPackageDiagramParser(PackageDiagramParser):
             merge_target = package_merge.attrib["mergedPackage"]
             merge_source = package.attrib["{" + namespaces['xmi'] + "}" + "id"]
             merge_type = "PackageMerge"
+            return PackageRelation(merge_id, merge_source, merge_target, merge_type)
         except Exception as exc:
             raise AttributeError("Corrupted package merge relation in source file") from exc
-        return PackageRelation(merge_id, merge_source, merge_target, merge_type)
 
     def parse_imports(self, packages, namespaces):
         m_imports = set()
@@ -105,9 +105,9 @@ class EAPackageDiagramParser(PackageDiagramParser):
             import_target = package_import.attrib["importedPackage"]
             import_source = package.attrib["{" + namespaces['xmi'] + "}" + "id"]
             import_type = "PackageImport"
+            return PackageRelation(import_id, import_source, import_target, import_type)
         except Exception as exc:
             raise AttributeError("Corrupted package import relation in source file") from exc
-        return PackageRelation(import_id, import_source, import_target, import_type)
 
     def parse_member_packages(self, packages, namespaces):
         m_member_of = set()
@@ -126,9 +126,9 @@ class EAPackageDiagramParser(PackageDiagramParser):
             member_target = package.attrib["{" + namespaces['xmi'] + "}" + "id"]
             member_source = child_package.attrib["{" + namespaces['xmi'] + "}" + "id"]
             member_type = "MemberOf"
+            return PackageRelation(member_id, member_source, member_target, member_type)
         except Exception as exc:
             raise AttributeError("Corrupted package node or one of its child package nodes in source file") from exc
-        return PackageRelation(member_id, member_source, member_target, member_type)
 
     def parse_usages(self, model, namespaces):
         m_usage = set()
@@ -144,9 +144,9 @@ class EAPackageDiagramParser(PackageDiagramParser):
             usage_target = usage.attrib["supplier"]
             usage_source = usage.attrib["client"]
             rel_type = "Usage"
+            return PackageRelation(usage_id, usage_source, usage_target, rel_type)
         except Exception as exc:
             raise AttributeError("Corrupted usage relation in source file") from exc
-        return PackageRelation(usage_id, usage_source, usage_target, rel_type)
 
     def get_model(self, file_name, namespaces):
         model = etree.parse(file_name).getroot().find('uml:Model', namespaces)
