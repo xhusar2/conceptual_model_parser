@@ -1,13 +1,14 @@
 from ..model import Model
 from lxml import etree
-from neomodel import StructuredNode, StringProperty, ArrayProperty, Relationship, config, StructuredRel, JSONProperty,\
+from neomodel import StructuredNode, StringProperty, ArrayProperty, Relationship, config, StructuredRel, JSONProperty, \
     UniqueIdProperty
 
 
 class ClsDiagramModel(Model):
 
     def __init__(self, model_id, classes, associations, association_nodes, association_classes,
-                 association_class_connections, generalizations, generalization_sets, c_types, a_types, *model_metadata):
+                 association_class_connections, generalizations, generalization_sets, c_types, a_types,
+                 enumerations, *model_metadata):
         self.id = model_id
         self.classes = classes
         self.associations = associations
@@ -18,6 +19,7 @@ class ClsDiagramModel(Model):
         self.association_types = a_types
         self.association_classes = association_classes
         self.association_class_connections = association_class_connections
+        self.enumerations = enumerations
         self.model_metadata = model_metadata
 
     def get_classes(self):
@@ -41,6 +43,9 @@ class ClsDiagramModel(Model):
     def get_types(self):
         return self.class_types, self.association_types
 
+    def get_enumerations(self):
+        return self.enumerations
+
     def get_namespaces(self):
         return etree.parse(self.model_file).getroot().nsmap
 
@@ -57,7 +62,7 @@ class ClsDiagramModel(Model):
             for a in c.attributes:
                 attrib = Attribute(_id=a.id, name=a.name, model_id=self.id, model_metadata=self.model_metadata)
                 nodes[attrib._id] = attrib
-                #relation
+                # relation
                 rel_source = node._id
                 rel_dest = attrib._id
                 rel_props = {}
@@ -72,19 +77,25 @@ class ClsDiagramModel(Model):
                                      model_id=self.id, model_metadata=self.model_metadata)
             nodes[node._id] = node
 
+        for e in self.enumerations:
+            node = Enumeration(_id=e.id, name=e.name, values=[str(a) for a in e.values],
+                               model_id=self.id, model_metadata=self.model_metadata)
+            nodes[node._id] = node
+
         for association in self.associations:
             if association.src in nodes and association.dest in nodes:
                 rel_source = association.src
                 rel_dest = association.dest
                 rel_props = {
-                    'association_type': self.association_types[association.id] if association.id in self.association_types else "",
+                    'association_type': self.association_types[
+                        association.id] if association.id in self.association_types else "",
                     'src_properties': association.src_props,
                     'dest_properties': association.dest_props,
                     'src_cardinality_lower_val': association.src_cardinality_lower_val,
-                    'src_cardinality_upper_val' : association.src_cardinality_upper_val,
-                    'dest_cardinality_lower_val' : association.dest_cardinality_lower_val,
-                    'rel.dest_cardinality_upper_val' : association.dest_cardinality_upper_val
-                    }
+                    'src_cardinality_upper_val': association.src_cardinality_upper_val,
+                    'dest_cardinality_lower_val': association.dest_cardinality_lower_val,
+                    'rel.dest_cardinality_upper_val': association.dest_cardinality_upper_val
+                }
                 rel_attrib = 'association'
                 relations.append((rel_source, rel_dest, rel_props, rel_attrib))
 
@@ -118,8 +129,10 @@ class ClsDiagramModel(Model):
 class BaseNode(StructuredNode):
     model_metadata = JSONProperty()
 
+
 class BaseRelation(StructuredRel):
     model_metadata = JSONProperty()
+
 
 class GeneralizationRel(BaseNode):
     generalization_id = StringProperty()
@@ -147,6 +160,13 @@ class GeneralizationSet(BaseNode):
     attributes = ArrayProperty()
 
 
+class Enumeration(BaseNode):
+    model_id = StringProperty()
+    _id = UniqueIdProperty()
+    name = StringProperty()
+    values = ArrayProperty()
+
+
 class Attribute(BaseNode):
     model_id = StringProperty()
     _id = UniqueIdProperty()
@@ -159,6 +179,7 @@ class AssociationNode(BaseNode):
     _id = UniqueIdProperty()
     association = Relationship("Class", "association", model=AssociationRel)
 
+
 class Class(BaseNode):
     model_id = StringProperty()
     _id = UniqueIdProperty()
@@ -167,6 +188,7 @@ class Class(BaseNode):
     generalization = Relationship("Class", "generalization", model=GeneralizationRel)
     association = Relationship("Class", "association", model=AssociationRel)
     attribute = Relationship("Attribute", "has")
+
 
 class AssociationClass(BaseNode):
     model_id = StringProperty()

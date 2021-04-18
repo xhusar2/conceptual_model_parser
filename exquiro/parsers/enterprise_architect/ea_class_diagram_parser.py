@@ -8,6 +8,7 @@ from ...models.class_diagram.attribute import Attribute
 from ...models.class_diagram.class_node import ClassNode
 from ...models.class_diagram.association_class import AssociationClass
 from ...models.class_diagram.association_class_connection import AssociationClassConnection
+from ...models.class_diagram.enumeration import Enumeration
 import re
 
 
@@ -249,6 +250,24 @@ class EaClsDiagramParser(ClsDiagramParser):
         if "name" in attribute.attrib:
             name = attribute.attrib["name"]
         return Attribute(attrib_id, name)
+
+    def parse_enumerations(self, model, namespaces):
+        m_enumerations = []
+        enumerations = model.findall('.//packagedElement[@xmi:type="uml:Enumeration"]', namespaces)
+        for e in enumerations:
+            m_enumerations.append(self.parse_enumeration(e, namespaces))
+        return m_enumerations
+
+    def parse_enumeration(self, enum, namespaces):
+        literals = enum.findall('./ownedLiteral[@xmi:type="uml:EnumerationLiteral"]', namespaces)
+        values = []
+        enum_id = enum.attrib["{" + namespaces['xmi'] + "}" + "id"]
+        enum_name = enum["name"] if "name" in enum.attrib else ""
+        for l in literals:
+            if "name" in l.attrib:
+                values.append(l["name"])
+        return Enumeration(values)
+
 
     def find_ref_element(self, model, id_ref, namespaces):
         xpath = './/*[@xmi:id="' + id_ref + '"]/type/@xmi:idref'

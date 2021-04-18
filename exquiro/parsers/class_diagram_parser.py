@@ -20,9 +20,10 @@ class ClsDiagramParser:
         m_generalizations = self.parse_generalizations(model, namespaces)
         c_types, a_types = self.parse_types(model, namespaces)
         m_gsets = self.parse_generalization_sets(model, namespaces)
+        m_enumerations = self.parse_enumerations(model, namespaces)
         return ClsDiagramModel(m_id, m_classes, m_associations, m_association_nodes, m_association_classes
                                , m_association_class_connections
-                               , m_generalizations, m_gsets, c_types, a_types, *model_metadata)
+                               , m_generalizations, m_gsets, c_types, a_types, m_enumerations ,*model_metadata)
 
     def parse_id(self, model, namespaces):
         pass
@@ -46,6 +47,9 @@ class ClsDiagramParser:
         pass
 
     def parse_generalizations(self, model, namespaces):
+        pass
+
+    def parse_enumerations(self, model, namespaces):
         pass
 
     def parse_attributes(self, c, namespaces):
