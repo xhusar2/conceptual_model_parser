@@ -15,10 +15,10 @@ class EaClsDiagramParser(ClsDiagramParser):
 
     # Input: xmi/xml file
     # Output parsed model ready to be stored to Neo4j
-    def parse_file(self, file_name):
+    def parse_file(self, file_name, *model_metadata):
         namespaces = self.get_namespaces(file_name)
         model = self.get_model(file_name, namespaces)
-        return self.parse_model(model, namespaces)
+        return self.parse_model(model, namespaces, *model_metadata)
 
     def parse_id(self, model, namespaces):
         packaged_element = model.find('./packagedElement', namespaces)

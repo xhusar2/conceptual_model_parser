@@ -7,7 +7,7 @@ from neomodel import StructuredNode, StringProperty, ArrayProperty, Relationship
 class ClsDiagramModel(Model):
 
     def __init__(self, model_id, classes, associations, association_nodes, association_classes,
-                 association_class_connections, generalizations, generalization_sets, c_types, a_types):
+                 association_class_connections, generalizations, generalization_sets, c_types, a_types, *model_metadata):
         self.id = model_id
         self.classes = classes
         self.associations = associations
@@ -18,6 +18,7 @@ class ClsDiagramModel(Model):
         self.association_types = a_types
         self.association_classes = association_classes
         self.association_class_connections = association_class_connections
+        self.model_metadata = model_metadata
 
     def get_classes(self):
         return self.classes
@@ -51,10 +52,10 @@ class ClsDiagramModel(Model):
                 class_type = self.class_types[c.id]
             else:
                 class_type = ""
-            node = Class(_id=c.id, name=c.name, type=class_type, model_id=self.id)
+            node = Class(_id=c.id, name=c.name, type=class_type, model_id=self.id, model_metadata=self.model_metadata)
             nodes[node._id] = node
             for a in c.attributes:
-                attrib = Attribute(_id=a.id, name=a.name, model_id=self.id)
+                attrib = Attribute(_id=a.id, name=a.name, model_id=self.id, model_metadata=self.model_metadata)
                 nodes[attrib._id] = attrib
                 #relation
                 rel_source = node._id
@@ -64,11 +65,11 @@ class ClsDiagramModel(Model):
                 relations.append((rel_source, rel_dest, rel_props, rel_attrib))
 
         for n in self.association_nodes:
-            node = AssociationNode(model_id=self.id, _id=n.node_id)
+            node = AssociationNode(model_id=self.id, _id=n.node_id, model_metadata=self.model_metadata)
             nodes[node._id] = node
         for c in self.generalization_sets:
             node = GeneralizationSet(_id=c.id, name=c.name, attributes=[str(a) for a in c.attributes],
-                                     model_id=self.id)
+                                     model_id=self.id, model_metadata=self.model_metadata)
             nodes[node._id] = node
 
         for association in self.associations:
@@ -88,7 +89,7 @@ class ClsDiagramModel(Model):
                 relations.append((rel_source, rel_dest, rel_props, rel_attrib))
 
         for ac in self.association_classes:
-            node = AssociationClass(model_id=self.id, _id=ac.node_id)
+            node = AssociationClass(model_id=self.id, _id=ac.node_id, model_metadata=self.model_metadata)
             nodes[node._id] = node
 
         for acc in self.association_class_connections:
@@ -114,14 +115,20 @@ class ClsDiagramModel(Model):
         return nodes, relations
 
 
-class GeneralizationRel(StructuredRel):
+class BaseNode(StructuredNode):
+    model_metadata = JSONProperty()
+
+class BaseRelation(StructuredRel):
+    model_metadata = JSONProperty()
+
+class GeneralizationRel(BaseNode):
     generalization_id = StringProperty()
     _type = StringProperty()
     src_properties = JSONProperty()
     dest_properties = JSONProperty()
 
 
-class AssociationRel(StructuredRel):
+class AssociationRel(BaseRelation):
     _id = StringProperty()
     relation_type = "Association"
     association_type = StringProperty()
@@ -133,26 +140,26 @@ class AssociationRel(StructuredRel):
     dest_properties = JSONProperty()
 
 
-class GeneralizationSet(StructuredNode):
+class GeneralizationSet(BaseNode):
     model_id = StringProperty()
     _id = UniqueIdProperty()
     name = StringProperty()
     attributes = ArrayProperty()
 
 
-class Attribute(StructuredNode):
+class Attribute(BaseNode):
     model_id = StringProperty()
     _id = UniqueIdProperty()
     name = StringProperty()
     attrib_type = StringProperty()
 
 
-class AssociationNode(StructuredNode):
+class AssociationNode(BaseNode):
     model_id = StringProperty()
     _id = UniqueIdProperty()
     association = Relationship("Class", "association", model=AssociationRel)
 
-class Class(StructuredNode):
+class Class(BaseNode):
     model_id = StringProperty()
     _id = UniqueIdProperty()
     name = StringProperty()
@@ -161,7 +168,7 @@ class Class(StructuredNode):
     association = Relationship("Class", "association", model=AssociationRel)
     attribute = Relationship("Attribute", "has")
 
-class AssociationClass(StructuredNode):
+class AssociationClass(BaseNode):
     model_id = StringProperty()
     _id = UniqueIdProperty()
     name = StringProperty()

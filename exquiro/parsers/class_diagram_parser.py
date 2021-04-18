@@ -7,12 +7,12 @@ class ClsDiagramParser:
 
     # Input: xmi/xml file
     # Output parsed model ready to be stored to Neo4j
-    def parse_file(self, file_name: str) -> ClsDiagramModel:
+    def parse_file(self, file_name: str, *model_metadata) -> ClsDiagramModel:
         namespaces = self.get_namespaces(file_name)
         model = self.get_model(file_name, namespaces)
-        return self.parse_model(model, namespaces)
+        return self.parse_model(model, namespaces, *model_metadata)
 
-    def parse_model(self, model, namespaces):
+    def parse_model(self, model, namespaces, *model_metadata):
         m_id = self.parse_id(model, namespaces)
         m_classes = self.parse_classes(model, namespaces)
         m_associations, m_association_nodes = self.parse_associations(model, namespaces)
@@ -22,7 +22,7 @@ class ClsDiagramParser:
         m_gsets = self.parse_generalization_sets(model, namespaces)
         return ClsDiagramModel(m_id, m_classes, m_associations, m_association_nodes, m_association_classes
                                , m_association_class_connections
-                               , m_generalizations, m_gsets, c_types, a_types)
+                               , m_generalizations, m_gsets, c_types, a_types, *model_metadata)
 
     def parse_id(self, model, namespaces):
         pass

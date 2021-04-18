@@ -15,13 +15,13 @@ class OpenponkClsDiagramParser(ClsDiagramParser):
 
     # Input: xmi/xml file
     # Output parsed model ready to be stored to Neo4j
-    def parse_file(self, file_name):
+    def parse_file(self, file_name, *model_metadata):
         namespaces = self.get_namespaces(file_name)
         model = self.get_model(file_name, namespaces)
         root = self.get_root(file_name)
-        return self.parse_model(model, root, namespaces)
+        return self.parse_model(model, root, namespaces, *model_metadata)
 
-    def parse_model(self, model, root, namespaces):
+    def parse_model(self, model, root, namespaces, *model_metadata):
         m_id = self.parse_id(model, namespaces)
         m_classes = self.parse_classes(model, namespaces)
         m_associations, m_association_nodes = self.parse_associations(model, namespaces)
@@ -31,7 +31,7 @@ class OpenponkClsDiagramParser(ClsDiagramParser):
         # TODO return neo4j model consisting from nodes and relations only
         #  implement in ClsDiagramModel
         return ClsDiagramModel(m_id, m_classes, m_associations, m_association_nodes
-                               , m_generalizations, m_gsets, c_types, a_types)
+                               , m_generalizations, m_gsets, c_types, a_types, *model_metadata)
 
 
     def parse_id(self, model, namespaces):

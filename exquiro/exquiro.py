@@ -17,7 +17,7 @@ AUTHOR = 'Richard Husar'
 #: Name of the application
 PROG_NAME = 'exquiro'
 #: Actual release tag
-RELEASE = '0.3'
+RELEASE = '0.4'
 #: Actual version
 VERSION = '0.1'
 
@@ -29,12 +29,12 @@ class Exquiro():
         self.factory.register_parser('enterprise_architect', 'class_diagram', EaClsDiagramParser)
         self.factory.register_parser('open_ponk', 'class_diagram', OpenponkClsDiagramParser)
 
-    def add_model_from_file(self, file_path):
+    def add_model_from_file(self, file_path, **model_metadata):
         xmi_file = XMIFile(file_path)
         diagrams = xmi_file.get_diagrams()
         for diagram in diagrams:
             parser = self.factory.get_parser(xmi_file.get_format(), diagram)
-            parsed_model = parser.parse_file(file_path)
+            parsed_model = parser.parse_file(file_path, file_path=file_path, **model_metadata)
             try:
                 # print("model name:", parsed_model.id)
                 self.neo4j_manager.delete_model(model_id=parsed_model.id)
@@ -69,11 +69,10 @@ class Exquiro():
             print(file_url)
             try:
                 res = requests.get(file_url)
-
                 file = open("download_file.xml", "w")
                 file.write(res.text)
                 file.close()
-                results.append(self.add_model_from_file("download_file.xml"))
+                results.append(self.add_model_from_file("download_file.xml", repo_url=repo_url, owner=owner))
             except:
                 print(f'file download error {file_url}')
         return sum(results), len(xmi_files)
