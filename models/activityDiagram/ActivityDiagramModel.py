@@ -4,11 +4,10 @@ from neomodel import StructuredNode, StringProperty, Relationship, StructuredRel
 
 class ActivityDiagramModel(Model):
 
-    def __init__(self, model_id, nodes, relations, url=None):
+    def __init__(self, model_id, nodes, relations):
         self.id = model_id
         self.nodes = nodes
         self.relations = relations
-        self.url = url
 
     def get_nodes(self):
         nodes = {}
@@ -36,27 +35,27 @@ class ActivityDiagramModel(Model):
 
     def get_node_type(self, node):
         if node.node_type == "Action":
-            return Action(_id=node.id, name=node.name, model_id=self.id, visibility=node.visibility, type="Action", url=self.url)
+            return Action(_id=node.id, name=node.name, model_id=self.id, visibility=node.visibility, type="Action")
         elif node.node_type == "Initial":
-            return InitialNode(_id=node.id, name=node.name, model_id=self.id, visibility=node.visibility, type="InitialNode", url=self.url)
+            return InitialNode(_id=node.id, name=node.name, model_id=self.id, visibility=node.visibility, type="InitialNode")
         elif node.node_type == "ActivityFinal":
-            return ActivityFinalNode(_id=node.id, name=node.name, model_id=self.id, visibility=node.visibility, type="ActivityFinalNode", url=self.url)
+            return ActivityFinalNode(_id=node.id, name=node.name, model_id=self.id, visibility=node.visibility, type="ActivityFinalNode")
         elif node.node_type == "ForkJoin":
-            return ForkJoinNode(_id=node.id, model_id=self.id, visibility=node.visibility, type="ForkJoinNode", url=self.url)
+            return ForkJoinNode(_id=node.id, model_id=self.id, visibility=node.visibility, type="ForkJoinNode")
         elif node.node_type == "FlowFinal":
-            return FlowFinalNode(_id=node.id, name=node.name, model_id=self.id, visibility=node.visibility, type="FlowFinalNode", url=self.url)
+            return FlowFinalNode(_id=node.id, name=node.name, model_id=self.id, visibility=node.visibility, type="FlowFinalNode")
         elif node.node_type == "DecisionMerge":
-            return DecisionMergeNode(_id=node.id, name=node.name, model_id=self.id, visibility=node.visibility, type="DecisionMergeNode", url=self.url)
+            return DecisionMergeNode(_id=node.id, name=node.name, model_id=self.id, visibility=node.visibility, type="DecisionMergeNode")
         elif node.node_type == "Partition":
-            return ActivityPartition(_id=node.id, name=node.name, model_id=self.id, visibility=node.visibility, type="ActivityPartition", url=self.url)
+            return ActivityPartition(_id=node.id, name=node.name, model_id=self.id, visibility=node.visibility, type="ActivityPartition")
         elif node.node_type == "CentralBuffer":
-            return CentralBufferNode(_id=node.id, name=node.name, model_id=self.id, visibility=node.visibility, type="CentralBufferNode", url=self.url)
+            return CentralBufferNode(_id=node.id, name=node.name, model_id=self.id, visibility=node.visibility, type="CentralBufferNode")
         elif node.node_type == "OutputPin":
-            return OutputPin(_id=node.id, name=node.name, model_id=self.id, visibility=node.visibility, ordering=node.ordering, type="OutputPin", url=self.url)
+            return OutputPin(_id=node.id, name=node.name, model_id=self.id, visibility=node.visibility, ordering=node.ordering, type="OutputPin")
         elif node.node_type == "InputPin":
-            return InputPin(_id=node.id, name=node.name, model_id=self.id, visibility=node.visibility, ordering=node.ordering, type="InputPin", url=self.url)
+            return InputPin(_id=node.id, name=node.name, model_id=self.id, visibility=node.visibility, ordering=node.ordering, type="InputPin")
         elif node.node_type == "DataStore":
-            return DataStoreNode(_id=node.id, name=node.name, model_id=self.id, visibility=node.visibility, type="DataStoreNode", url=self.url)
+            return DataStoreNode(_id=node.id, name=node.name, model_id=self.id, visibility=node.visibility, type="DataStoreNode")
         else:
             return None
 
@@ -69,7 +68,7 @@ class RelationModel(StructuredRel):
 
 
 class ActivityDiagramNode(StructuredNode):
-    url = StringProperty()
+    pass
 
 
 class ActivityNode(ActivityDiagramNode):
