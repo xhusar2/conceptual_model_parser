@@ -68,15 +68,13 @@ class RelationModel(StructuredRel):
 
 
 class ActivityDiagramNode(StructuredNode):
-    pass
-
-
-class ActivityNode(ActivityDiagramNode):
     model_id = StringProperty()
     _id = UniqueIdProperty()
     type = StringProperty()
     visibility = StringProperty()
-    name = StringProperty()
+
+
+class ActivityNode(ActivityDiagramNode):
     PartitionMember = Relationship("ActivityPartition", "partitionMember", model=RelationModel)
 
 
@@ -85,10 +83,6 @@ class ControlFlowNode(ActivityNode):
 
 
 class ActivityPartition(ActivityDiagramNode):
-    model_id = StringProperty()
-    _id = UniqueIdProperty()
-    type = StringProperty()
-    visibility = StringProperty()
     name = StringProperty()
     PartitionMember = Relationship("ActivityPartition", "partitionMember", model=RelationModel)
 
@@ -129,11 +123,12 @@ class Action(ExecutableNode):
 
 
 class ControlNode(ControlFlowNode):
+    name = StringProperty()
     ObjectFlow = Relationship("ActivityNode", "objectFlow", model=RelationModel)
 
 
 class FinalNode(ControlNode):
-    name = StringProperty()
+    pass
 
 
 class ActivityFinalNode(FinalNode):
@@ -145,7 +140,7 @@ class FlowFinalNode(FinalNode):
 
 
 class InitialNode(ControlNode):
-    name = StringProperty()
+    pass
 
 
 class ForkJoinNode(ControlNode):
@@ -153,4 +148,4 @@ class ForkJoinNode(ControlNode):
 
 
 class DecisionMergeNode(ControlNode):
-    name = StringProperty()
+    pass
