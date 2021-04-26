@@ -134,7 +134,7 @@ class BaseRelation(StructuredRel):
     model_metadata = JSONProperty()
 
 
-class GeneralizationRel(BaseNode):
+class GeneralizationRel(BaseRelation):
     generalization_id = StringProperty()
     _type = StringProperty()
     src_properties = JSONProperty()

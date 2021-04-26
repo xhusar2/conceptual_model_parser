@@ -26,4 +26,4 @@ class XMIFile:
         if applied_profile is not None and 'href' in applied_profile.attrib:
             # print('format: openPonk')
             return 'open_ponk'
-        return ''
+        return 'open_ponk'

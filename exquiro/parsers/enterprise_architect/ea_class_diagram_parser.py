@@ -262,11 +262,11 @@ class EaClsDiagramParser(ClsDiagramParser):
         literals = enum.findall('./ownedLiteral[@xmi:type="uml:EnumerationLiteral"]', namespaces)
         values = []
         enum_id = enum.attrib["{" + namespaces['xmi'] + "}" + "id"]
-        enum_name = enum["name"] if "name" in enum.attrib else ""
+        enum_name = enum.attrib["name"] if "name" in enum.attrib else ""
         for l in literals:
             if "name" in l.attrib:
-                values.append(l["name"])
-        return Enumeration(values)
+                values.append(l.attrib["name"])
+        return Enumeration(enum_id,enum_name,values)
 
 
     def find_ref_element(self, model, id_ref, namespaces):
