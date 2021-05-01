@@ -120,8 +120,8 @@ class EAPackageDiagramParser(PackageDiagramParser):
 
     @staticmethod
     def parse_member_package(child_package, package, namespaces):
-        # need to generate unique id
         try:
+            # need to generate unique id
             member_id = str(uuid.uuid4())
             member_target = package.attrib["{" + namespaces['xmi'] + "}" + "id"]
             member_source = child_package.attrib["{" + namespaces['xmi'] + "}" + "id"]
