@@ -118,7 +118,7 @@ class ExecutableNode(ControlFlowNode):
 
 
 class Action(ExecutableNode):
-    HasPin = Relationship("Pin", "has", model=RelationModel)
+    HasPin = Relationship("Pin", "hasPin", model=RelationModel)
     name = StringProperty()
 
 
