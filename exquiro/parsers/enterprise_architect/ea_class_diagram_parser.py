@@ -1,5 +1,4 @@
 from ..class_diagram_parser import ClsDiagramParser
-from ...models.class_diagram.attribute import Attribute
 from ...models.class_diagram.association import Association
 from ...models.class_diagram.association_node import AssociationNode
 from ...models.class_diagram.generalization_set import GeneralizationSet

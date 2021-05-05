@@ -17,13 +17,11 @@ def get_xmi_files(xmi_files, token_val, owner, repo, path=""):
     else:
         r = requests.get(query_url)
     json_data = json.loads(r.text)
+    # find all files ending with xmi or xml
     for json_dict in json_data:
-        #print(json_dict)
         if "type" in json_dict:
-            #print(json_dict['name'])
             if json_dict['type'] == 'file' and (
                     str(json_dict['name']).endswith('.xmi') or str(json_dict['name']).endswith('.xml')):
-                #print('downloading file:', json_dict['name'], json_dict['url'])
                 xmi_files.append(json_dict['download_url'])
             if json_dict['type'] == 'dir':
                 get_xmi_files(xmi_files, token_val, owner, repo, json_dict['path'])

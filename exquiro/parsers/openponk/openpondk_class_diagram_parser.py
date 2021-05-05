@@ -11,9 +11,6 @@ import re
 
 
 class OpenponkClsDiagramParser(ClsDiagramParser):
-
-
-
     # Input: xmi/xml file
     # Output parsed model ready to be stored to Neo4j
     def parse_file(self, file_name, *model_metadata):
@@ -32,8 +29,6 @@ class OpenponkClsDiagramParser(ClsDiagramParser):
         m_enumerations = self.parse_enumerations(model, namespaces)
         m_association_classes = []
         m_association_class_connections = []
-        # TODO return neo4j model consisting from nodes and relations only
-        #  implement in ClsDiagramModel
         return ClsDiagramModel(m_id, m_classes, m_associations, m_association_nodes, m_association_classes
                                , m_association_class_connections
                                , m_generalizations, m_gsets, c_types, a_types, m_enumerations, *model_metadata)

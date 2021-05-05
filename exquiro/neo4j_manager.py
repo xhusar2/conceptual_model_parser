@@ -1,11 +1,7 @@
 from neomodel import config
 from neomodel import db as neo_db
 
-# TODO sort out connection and config file
-#config.DATABASE_URL = 'bolt://neo4j:password@localhost:7687'
-
-
-# this class represents Neo4j manager. It stores model to db, deletes models from db, executes queries
+# this class represents Neo4j manager. It stores model to db, deletes models from db, executes queries.
 class Neo4jManager():
 
     def __init__(self, DATABASE_URL):
@@ -22,7 +18,6 @@ class Neo4jManager():
         neo_db.cypher_query(f'MATCH (n)-[r]-() WHERE n.model_id = \'{model_id}\' DETACH DELETE r')
         neo_db.cypher_query(f'MATCH (n) WHERE n.model_id = \'{model_id}\' DETACH DELETE n')
 
-    #TODO check nodes in relations exists
     @staticmethod
     def add_model(model):
         nodes, relations = model.get_neo4j_model()

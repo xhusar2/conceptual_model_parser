@@ -8,7 +8,6 @@ from configparser import ConfigParser
 import requests
 #: Paths to default configuration files
 DEFAULT_CONFIG_FILES = [
-    '../config/app.cfg',
     '../config/neo4j.cfg'
 ]
 
@@ -36,7 +35,6 @@ class Exquiro():
             parser = self.factory.get_parser(xmi_file.get_format(), diagram)
             parsed_model = parser.parse_file(file_path, *model_metadata)
             try:
-                # print("model name:", parsed_model.id)
                 self.neo4j_manager.delete_model(model_id=parsed_model.id)
                 self.neo4j_manager.add_model(parsed_model)
             except:
@@ -51,9 +49,7 @@ class Exquiro():
             parser = self.factory.get_parser(xmi_file.get_format(), diagram)
             parsed_model = parser.parse_file(file_path)
             try:
-                # print("model name:", parsed_model.id)
                 self.neo4j_manager.delete_model(model_id=parsed_model.id)
-                # self.neo4j_manager.add_model(parsed_model)
             except:
                 print(f'could not parse model from file {file_path}')
                 return False
@@ -101,10 +97,10 @@ def create_app():
     settings = ConfigParser()
     neo4j_settings = DEFAULT_CONFIG_FILES[1]
     settings.read(neo4j_settings)
+    # TODO - use config file
     neo4j_user = 'neo4j' # settings.get("NEO4J", "USERNAME")
     neo4j_password = 'password' # settings.get("NEO4J", "PASSWORD")
     neo4j_url = 'neo4j:7687'# settings.get("NEO4J", "DATABASE_URL")
     neo4j_cs = f'bolt://{neo4j_user}:{neo4j_password}@{neo4j_url}'
-    # print(neo4j_cs)
     app = Exquiro(DATABASE_URL=neo4j_cs)
     return app

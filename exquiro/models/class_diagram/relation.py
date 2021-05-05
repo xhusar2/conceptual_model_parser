@@ -13,6 +13,7 @@ class Relation:
         self.relation_type = relation_type
 
     def __str__(self):
-        return f'id:{self.id} name: {self.name} src_id: {self.src} dest_id: {self.dest} relation_type:{self.relation_type}'
+        return f'id:{self.id} name: {self.name} src_id: {self.src} dest_id: {self.dest} ' \
+               f'relation_type:{self.relation_type}'
 
 

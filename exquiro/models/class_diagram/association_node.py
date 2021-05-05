@@ -1,4 +1,3 @@
-
 class AssociationNode:
     node_id = ""
 

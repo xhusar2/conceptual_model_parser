@@ -17,4 +17,4 @@ class ClassNode:
         self.attributes = attributes
 
     def __str__(self):
-        return f'id:{self.id} name: {self.name} attributes: {self.attributes}' #parent: {self.parent_id}'
+        return f'id:{self.id} name: {self.name} attributes: {self.attributes}'

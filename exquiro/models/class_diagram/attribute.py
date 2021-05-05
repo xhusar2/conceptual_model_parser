@@ -10,4 +10,4 @@ class Attribute:
         self.id = attrib_id
 
     def __str__(self):
-        return f'id:{self.id} name: {self.name}' #parent: {self.parent_id}'
+        return f'id:{self.id} name: {self.name}'

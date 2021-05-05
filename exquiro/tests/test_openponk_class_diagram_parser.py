@@ -1,13 +1,14 @@
 import unittest
-from ..parsers.enterprise_architect.ea_class_diagram_parser import EaClsDiagramParser
+from ..parsers.openponk.openpondk_class_diagram_parser import OpenponkClsDiagramParser
 from ..models.class_diagram.class_diagram_model import ClsDiagramModel
 from ..models.class_diagram.class_node import ClassNode
 
-class TestEAPackageDiagramParser(unittest.TestCase):
+class TestOpenponkClassDiagramParser(unittest.TestCase):
     def setUp(self):
-        self.test_file = "exquiro/tests/ea_class_basic.xml"
-        self.parser = EaClsDiagramParser()
+        self.test_file = "exquiro/tests/openponk_class_basic.xmi"
+        self.parser = OpenponkClsDiagramParser()
         self.namespaces = self.parser.get_namespaces(self.test_file)
+        self.root = self.parser.get_root(self.test_file)
         self.model = self.parser.get_model(self.test_file, self.namespaces)
 
     def test_get_namespaces(self):
@@ -19,12 +20,12 @@ class TestEAPackageDiagramParser(unittest.TestCase):
     def test_get_model(self):
         model = self.parser.get_model(self.test_file, self.namespaces)
         self.assertIsNotNone(model)
-        self.assertEqual(model.attrib["name"], "EA_Model")
+        self.assertEqual(model.attrib["name"], "Openponk project")
         self.assertEqual(model.attrib["{" + self.namespaces['xmi'] + "}" + "type"], "uml:Model")
-        self.assertFalse('{' + self.namespaces['xmi'] + '}' + 'id' in model.attrib)
+        self.assertTrue('{' + self.namespaces['xmi'] + '}' + 'id' in model.attrib)
 
     def test_parse_model(self):
-        parsed_model = self.parser.parse_model(self.model, self.namespaces)
+        parsed_model = self.parser.parse_model(self.model, self.root, self.namespaces)
         self.assertEqual(type(parsed_model), ClsDiagramModel)
 
     def test_parse_file(self):
