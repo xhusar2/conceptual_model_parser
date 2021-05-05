@@ -3,6 +3,7 @@ from ..parsers.enterprise_architect.ea_class_diagram_parser import EaClsDiagramP
 from ..models.class_diagram.class_diagram_model import ClsDiagramModel
 from ..models.class_diagram.class_node import ClassNode
 
+
 class TestEAClassDiagramParser(unittest.TestCase):
     def setUp(self):
         self.test_file = "exquiro/tests/test_models/ea_class_basic.xml"

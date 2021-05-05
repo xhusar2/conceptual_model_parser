@@ -3,9 +3,10 @@ from ..parsers.openponk.openpondk_class_diagram_parser import OpenponkClsDiagram
 from ..models.class_diagram.class_diagram_model import ClsDiagramModel
 from ..models.class_diagram.class_node import ClassNode
 
+
 class TestOpenponkClassDiagramParser(unittest.TestCase):
     def setUp(self):
-        self.test_file = "exquiro/tests/openponk_class_basic.xmi"
+        self.test_file = "exquiro/tests/test_models/openponk_class_basic.xmi"
         self.parser = OpenponkClsDiagramParser()
         self.namespaces = self.parser.get_namespaces(self.test_file)
         self.root = self.parser.get_root(self.test_file)

@@ -95,7 +95,7 @@ class Exquiro():
 
 def create_app():
     settings = ConfigParser()
-    neo4j_settings = DEFAULT_CONFIG_FILES[1]
+    neo4j_settings = DEFAULT_CONFIG_FILES[0]
     settings.read(neo4j_settings)
     # TODO - use config file
     neo4j_user = 'neo4j' # settings.get("NEO4J", "USERNAME")

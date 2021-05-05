@@ -12,11 +12,12 @@ class Neo4jManager():
     def delete_all():
         neo_db.cypher_query("MATCH ()-[r]-() DETACH DELETE r")
         neo_db.cypher_query("MATCH (n) DETACH DELETE n")
-
+        return True
     @staticmethod
     def delete_model(model_id):
         neo_db.cypher_query(f'MATCH (n)-[r]-() WHERE n.model_id = \'{model_id}\' DETACH DELETE r')
         neo_db.cypher_query(f'MATCH (n) WHERE n.model_id = \'{model_id}\' DETACH DELETE n')
+        return True
 
     @staticmethod
     def add_model(model):
@@ -33,5 +34,6 @@ class Neo4jManager():
                 src = nodes[rel_source]
                 dest = nodes[rel_dest]
                 getattr(src, rel_attrib).connect(dest, rel_props)
+        return True
 
 

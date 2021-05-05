@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='exquiro',
-    version='0.2.0',
+    version='0.2.1',
     keywords='github repositories sieve projects community',
     description='Tool for parsing XMI files and searching in conceptual models from those files.',
     #long_description=long_description,
