@@ -7,9 +7,11 @@ from ..models.class_diagram.class_node import ClassNode
 class TestEAClassDiagramParser(unittest.TestCase):
     def setUp(self):
         self.test_file = "exquiro/tests/test_models/ea_class_basic.xml"
+        self.test_file_advanced = "exquiro/tests/test_models/ea_case_advanced.xmi"
         self.parser = EaClsDiagramParser()
         self.namespaces = self.parser.get_namespaces(self.test_file)
         self.model = self.parser.get_model(self.test_file, self.namespaces)
+        self.model_advanced = self.parser.get_model(self.test_file_advanced, self.namespaces)
 
     def test_get_namespaces(self):
         namespaces = self.parser.get_namespaces(self.test_file)
@@ -41,3 +43,22 @@ class TestEAClassDiagramParser(unittest.TestCase):
         associations = self.parser.parse_associations(self.model, self.namespaces)
         self.assertEqual(len(associations), 2)
 
+    def test_parse_enumerations_count(self):
+        enumerations = self.parser.parse_enumerations(self.model, self.namespaces)
+        self.assertEqual(len(enumerations), 0)
+
+    def test_parse_enumerations_adv_count(self):
+        enumerations = self.parser.parse_enumerations(self.model_advanced, self.namespaces)
+        self.assertEqual(len(enumerations), 2)
+
+    def test_parse_attributes_adv_count(self):
+        attributes = self.parser.parse_attributes(self.model_advanced, self.namespaces)
+        self.assertEqual(len(attributes), 0)
+
+    def test_parse_generalizations_adv_count(self):
+        generalizations = self.parser.parse_generalizations(self.model_advanced, self.namespaces)
+        self.assertEqual(len(generalizations), 0)
+
+    def test_parse_generalization_sets_adv_count(self):
+        gs = self.parser.parse_generalization_sets(self.model_advanced, self.namespaces)
+        self.assertEqual(len(gs), 0)

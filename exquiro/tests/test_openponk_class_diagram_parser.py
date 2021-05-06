@@ -42,3 +42,20 @@ class TestOpenponkClassDiagramParser(unittest.TestCase):
         associations = self.parser.parse_associations(self.model, self.namespaces)
         self.assertEqual(len(associations), 2)
 
+    def test_parse_enumerations_count(self):
+        enumerations = self.parser.parse_enumerations(self.model, self.namespaces)
+        self.assertEqual(len(enumerations), 0)
+
+
+    def test_parse_attributes_adv_count(self):
+        attributes = self.parser.parse_attributes(self.model, self.namespaces)
+        self.assertEqual(len(attributes), 0)
+
+    def test_parse_generalizations_adv_count(self):
+        generalizations = self.parser.parse_generalizations(self.model, self.namespaces)
+        self.assertEqual(len(generalizations), 1)
+
+    def test_parse_generalization_sets_count(self):
+        gs = self.parser.parse_generalization_sets(self.model, self.namespaces)
+        self.assertEqual(len(gs), 0)
+
