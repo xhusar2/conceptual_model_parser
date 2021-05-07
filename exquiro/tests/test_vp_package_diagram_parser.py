@@ -1,5 +1,5 @@
 import unittest
-from exquiro.parsers.visual_paradigm.vp_package_diagram_parser import VPPackageParser
+from exquiro.parsers.visual_paradigm.vp_package_diagram_parser import VPPackageDiagramParser
 from exquiro.models.package_diagram.package_node import PackageNode
 from exquiro.models.package_diagram.package_relation import PackageRelation
 from exquiro.models.package_diagram.package_diagram_model import PackageDiagramModel
@@ -8,7 +8,7 @@ from exquiro.models.package_diagram.package_diagram_model import PackageDiagramM
 class TestEAPackageDiagramParser(unittest.TestCase):
     def setUp(self):
         self.test_file = "/exquiro/tests/test_models/package/vp_ShoppingSystem.xmi"
-        self.parser = VPPackageParser()
+        self.parser = VPPackageDiagramParser()
         self.namespaces = self.parser.get_namespaces(self.test_file)
         self.model = self.parser.get_model(self.test_file, self.namespaces)
 

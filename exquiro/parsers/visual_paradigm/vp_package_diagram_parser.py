@@ -5,7 +5,7 @@ from lxml import etree
 import uuid
 
 
-class VPPackageParser(PackageDiagramParser):
+class VPPackageDiagramParser(PackageDiagramParser):
 
     def parse_nodes(self, model, namespaces):
         try:

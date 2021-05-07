@@ -5,7 +5,7 @@ from lxml import etree
 import uuid
 
 
-class VPActivityParser(ActivityDiagramParser):
+class VPActivityDiagramParser(ActivityDiagramParser):
     def parse_id(self, model, namespaces):
         if '{' + namespaces['xmi'] + '}' + 'id' not in model.attrib:
             return uuid.uuid4()

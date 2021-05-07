@@ -5,7 +5,7 @@ from lxml import etree
 import uuid
 
 
-class EAActDiagramParser(ActivityDiagramParser):
+class EAActivityDiagramParser(ActivityDiagramParser):
     def parse_id(self, model, namespaces):
         return str(uuid.uuid4())
 

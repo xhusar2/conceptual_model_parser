@@ -1,5 +1,5 @@
 import unittest
-from exquiro.parsers.visual_paradigm.vp_activity_diagram_parser import VPActivityParser
+from exquiro.parsers.visual_paradigm.vp_activity_diagram_parser import VPActivityDiagramParser
 from exquiro.models.activity_diagram.activity_diagram_model import ActivityDiagramModel
 from exquiro.models.activity_diagram.activity_relation import ActivityRelation
 from exquiro.models.activity_diagram.activity_node import ActivityNode
@@ -8,7 +8,7 @@ from exquiro.models.activity_diagram.activity_node import ActivityNode
 class TestEAActivityDiagramParser(unittest.TestCase):
     def setUp(self):
         self.test_file = "/exquiro/tests/test_models/activity/vp_OrderPayment.xmi"
-        self.parser = VPActivityParser()
+        self.parser = VPActivityDiagramParser()
         self.namespaces = self.parser.get_namespaces(self.test_file)
         self.model = self.parser.get_model(self.test_file, self.namespaces)
 

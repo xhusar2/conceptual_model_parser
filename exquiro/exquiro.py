@@ -3,7 +3,12 @@ from .neo4j_manager import Neo4jManager
 from .git_connector import get_xmi_files
 from .parsers.parser_factory import ParserFactory
 from .parsers.enterprise_architect.ea_class_diagram_parser import  EaClsDiagramParser
+from .parsers.enterprise_architect.ea_package_diagram_parser import EAPackageDiagramParser
+from .parsers.enterprise_architect.ea_activity_diagram_parser import EAActivityDiagramParser
 from .parsers.openponk.openpondk_class_diagram_parser import OpenponkClsDiagramParser
+from .parsers.openponk.openponk_package_diagram_parser import OpenPonkPackageDiagramParser
+from .parsers.visual_paradigm.vp_activity_diagram_parser import VPActivityDiagramParser
+from .parsers.visual_paradigm.vp_package_diagram_parser import VPPackageDiagramParser
 from configparser import ConfigParser
 import requests
 #: Paths to default configuration files
@@ -27,6 +32,11 @@ class Exquiro():
         self.factory = ParserFactory()
         self.factory.register_parser('enterprise_architect', 'class_diagram', EaClsDiagramParser)
         self.factory.register_parser('open_ponk', 'class_diagram', OpenponkClsDiagramParser)
+        self.factory.register_parser('enterprise_architect', 'package_diagram', EAPackageDiagramParser)
+        self.factory.register_parser('enterprise_architect', 'activity_diagram', EAActivityDiagramParser)
+        self.factory.register_parser('visual_paradigm', 'package_diagram', VPPackageDiagramParser)
+        self.factory.register_parser('visual_paradigm', 'activity_diagram', VPActivityDiagramParser)
+        self.factory.register_parser('open_ponk', 'package_diagram', OpenPonkPackageDiagramParser)
 
     def add_model_from_file(self, file_path, *model_metadata):
         xmi_file = XMIFile(file_path)
