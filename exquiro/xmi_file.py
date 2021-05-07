@@ -8,7 +8,8 @@ class XMIFile:
 
     def get_diagrams(self):
         # TODO - implement hierarchical system of picking diagrams in a iterative manner and choosing the best possible
-        return ['class_diagram']
+        #return ['class_diagram']
+        return ['package_diagram']
 
     def get_namespaces(self, file_name):
         return etree.parse(file_name).getroot().nsmap
