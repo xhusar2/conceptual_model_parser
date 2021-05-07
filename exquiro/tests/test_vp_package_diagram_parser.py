@@ -1,13 +1,13 @@
 import unittest
-from parsers.VisualParadigmParsers.VPPackageParser import VPPackageParser
-from models.packageDiagram.PackageNode import PackageNode
-from models.packageDiagram.PackageRelation import PackageRelation
-from models.packageDiagram.PackageDiagramModel import PackageDiagramModel
+from exquiro.parsers.visual_paradigm.vp_package_diagram_parser import VPPackageParser
+from exquiro.models.package_diagram.package_node import PackageNode
+from exquiro.models.package_diagram.package_relation import PackageRelation
+from exquiro.models.package_diagram.package_diagram_model import PackageDiagramModel
 
 
 class TestEAPackageDiagramParser(unittest.TestCase):
     def setUp(self):
-        self.test_file = "/Users/fanda/fanda/Skola_2020-2021_ZS/Bakalarka/source/conceptual_model_parser/xmiExamples/VP_Package/ShoppingSystem.xmi"
+        self.test_file = "/exquiro/tests/test_models/package/vp_ShoppingSystem.xmi"
         self.parser = VPPackageParser()
         self.namespaces = self.parser.get_namespaces(self.test_file)
         self.model = self.parser.get_model(self.test_file, self.namespaces)

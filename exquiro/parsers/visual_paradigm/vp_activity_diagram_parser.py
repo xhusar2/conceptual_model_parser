@@ -1,6 +1,6 @@
-from parsers.ActivityDiagramParser import ActivityDiagramParser
-from models.activityDiagram.ActivityNode import ActivityNode
-from models.activityDiagram.ActivityRelation import ActivityRelation
+from exquiro.parsers.activity_diagram_parser import ActivityDiagramParser
+from exquiro.models.activity_diagram.activity_node import ActivityNode
+from exquiro.models.activity_diagram.activity_relation import ActivityRelation
 from lxml import etree
 import uuid
 

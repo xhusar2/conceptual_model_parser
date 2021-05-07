@@ -1,4 +1,4 @@
-from ..Model import Model
+from ..model import Model
 from neomodel import StructuredNode, StringProperty, Relationship, StructuredRel, UniqueIdProperty
 
 

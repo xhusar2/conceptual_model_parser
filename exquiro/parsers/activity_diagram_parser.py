@@ -1,5 +1,5 @@
-from models.activityDiagram.ActivityDiagramModel import ActivityDiagramModel
-from parsers.DiagramParser import DiagramParser
+from exquiro.models.activity_diagram.activity_diagram_model import ActivityDiagramModel
+from exquiro.parsers.diagram_parser import DiagramParser
 from lxml import etree
 
 

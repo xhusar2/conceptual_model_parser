@@ -1,6 +1,5 @@
-from models.packageDiagram.PackageDiagramModel import PackageDiagramModel
-from models.packageDiagram.PackageNode import PackageNode
-from parsers.DiagramParser import DiagramParser
+from exquiro.models.package_diagram.package_diagram_model import PackageDiagramModel
+from exquiro.parsers.diagram_parser import DiagramParser
 from lxml import etree
 
 

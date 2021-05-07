@@ -1,6 +1,6 @@
-from parsers.PackageDiagramParser import PackageDiagramParser
-from models.packageDiagram.PackageNode import PackageNode
-from models.packageDiagram.PackageRelation import PackageRelation
+from exquiro.parsers.package_diagram_parser import PackageDiagramParser
+from exquiro.models.package_diagram.package_node import PackageNode
+from exquiro.models.package_diagram.package_relation import PackageRelation
 from lxml import etree
 import uuid
 

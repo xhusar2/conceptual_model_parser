@@ -21,7 +21,7 @@ class XMIFile:
         exporter = root.find('xmi:Documentation', namespaces)
         if exporter is not None and 'exporter' in exporter.attrib and exporter.attrib["exporter"] == "Visual Paradigm":
             return "visual_paradigm"
-        if exporter is not None and 'exporter' in exporter.attrib:
+        if exporter is not None and 'exporter' in exporter.attrib and exporter.attrib["exporter"] == "Enterprise Architect":
             return "enterprise_architect"
         # openPonk format
         applied_profile = root.find('.//appliedProfile', namespaces)

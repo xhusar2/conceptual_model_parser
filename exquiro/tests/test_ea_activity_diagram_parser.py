@@ -1,14 +1,14 @@
 import unittest
-from parsers.VisualParadigmParsers.VPActivityParser import VPActivityParser
-from models.activityDiagram.ActivityDiagramModel import ActivityDiagramModel
-from models.activityDiagram.ActivityRelation import ActivityRelation
-from models.activityDiagram.ActivityNode import ActivityNode
+from exquiro.parsers.enterprise_architect.ea_activity_diagram_parser import EAActDiagramParser
+from exquiro.models.activity_diagram.activity_diagram_model import ActivityDiagramModel
+from exquiro.models.activity_diagram.activity_relation import ActivityRelation
+from exquiro.models.activity_diagram.activity_node import ActivityNode
 
 
 class TestEAActivityDiagramParser(unittest.TestCase):
     def setUp(self):
-        self.test_file = "/Users/fanda/fanda/Skola_2020-2021_ZS/Bakalarka/source/conceptual_model_parser/xmiExamples/VP_Activity/OrderPayment.xmi"
-        self.parser = VPActivityParser()
+        self.test_file = "exquiro/tests/test_models/activity/ea_OrderPayment.xml"
+        self.parser = EAActDiagramParser()
         self.namespaces = self.parser.get_namespaces(self.test_file)
         self.model = self.parser.get_model(self.test_file, self.namespaces)
 
@@ -21,16 +21,13 @@ class TestEAActivityDiagramParser(unittest.TestCase):
     def test_get_model(self):
         model = self.parser.get_model(self.test_file, self.namespaces)
         self.assertIsNotNone(model)
-        self.assertEqual(model.attrib["name"], "untitled")
-        self.assertTrue('{' + self.namespaces['xmi'] + '}' + 'id' in model.attrib)
+        self.assertEqual(model.attrib["name"], "EA_Model")
+        self.assertEqual(model.attrib["{" + self.namespaces['xmi'] + "}" + "type"], "uml:Model")
+        self.assertFalse('{' + self.namespaces['xmi'] + '}' + 'id' in model.attrib)
 
     def test_parse_model_type(self):
         model = self.parser.parse_model(self.model, self.namespaces)
         self.assertEqual(type(model), ActivityDiagramModel)
-
-    def test_parse_nodes_no_model(self):
-        with self.assertRaises(AttributeError):
-            self.parser.parse_nodes(None, self.namespaces)
 
     def test_parse_nodes_count(self):
         nodes = self.parser.parse_nodes(self.model, self.namespaces)
@@ -41,9 +38,13 @@ class TestEAActivityDiagramParser(unittest.TestCase):
         for node in nodes:
             self.assertEqual(type(node), ActivityNode)
 
+    def test_parse_nodes_no_model(self):
+        with self.assertRaises(AttributeError):
+            self.parser.parse_nodes(None, self.namespaces)
+
     def test_parse_relations_count(self):
         relations = self.parser.parse_relations(self.model, self.namespaces)
-        self.assertEqual(len(relations), 29)
+        self.assertEqual(len(relations), 27)
 
     def test_parse_relations_type(self):
         relations = self.parser.parse_relations(self.model, self.namespaces)
@@ -55,48 +56,54 @@ class TestEAActivityDiagramParser(unittest.TestCase):
             self.parser.parse_relations(None, self.namespaces)
 
     def test_parse_activity_node_id(self):
-        input_pin = self.model.find('.//argument[@xmi:type="uml:InputPin"]', self.namespaces)
-        node = self.parser.parse_activity_node(input_pin, self.namespaces, "InputPin")
-        self.assertEqual(node.id, "C.Jn0x6GAqAUOAe4")
+        input_pins = self.model.findall('.//input[@xmi:type="uml:InputPin"]', self.namespaces)
+        node = self.parser.parse_activity_node(input_pins[0], self.namespaces, "InputPin")
+        self.assertEqual(node.id, "EAID_704D11B7_23DF_40c8_B974_350C4398D30B")
 
     def test_parse_activity_node_name_empty(self):
-        input_pin = self.model.find('.//argument[@xmi:type="uml:InputPin"]', self.namespaces)
-        node = self.parser.parse_activity_node(input_pin, self.namespaces, "InputPin")
+        input_pins = self.model.findall('.//input[@xmi:type="uml:InputPin"]', self.namespaces)
+        node = self.parser.parse_activity_node(input_pins[0], self.namespaces, "InputPin")
+        self.assertEqual(node.name, None)
+
+    def test_parse_activity_node_name_missing(self):
+        fork_join = self.model.findall('.//node[@xmi:type="uml:ForkNode"]', self.namespaces)
+        node = self.parser.parse_activity_node(fork_join[0], self.namespaces, "ForkJoin")
         self.assertEqual(node.name, None)
 
     def test_parse_activity_node_name_exists(self):
-        actions = set(self.model.findall('.//ownedMember[@xmi:type="uml:CallBehaviorAction"]', self.namespaces))
-        actions.update(self.model.findall('.//node[@xmi:type="uml:CallBehaviorAction"]', self.namespaces))
-        node = self.parser.parse_activity_node(list(actions)[0], self.namespaces, "Action")
+        actions = self.model.findall('.//node[@xmi:type="uml:Action"]', self.namespaces)
+        node = self.parser.parse_activity_node(actions[0], self.namespaces, "Action")
         self.assertNotEqual(node.name, None)
 
     def test_parse_activity_node_name_data(self):
-        data_stores = set(self.model.findall('.//ownedMember[@xmi:type="uml:DataStoreNode"]', self.namespaces))
-        data_stores.update(set(self.model.findall('.//node[@xmi:type="uml:DataStoreNode"]', self.namespaces)))
-        node = self.parser.parse_activity_node(list(data_stores)[0], self.namespaces, "DataStore")
-        self.assertEqual(node.name, "Invoice data store")
+        stores = self.model.findall('.//node[@xmi:type="uml:DataStoreNode"]', self.namespaces)
+        node = self.parser.parse_activity_node(stores[0], self.namespaces, "DataStore")
+        self.assertEqual(node.name, "Invoice Data store")
 
     def test_parse_activity_node_type(self):
-        input_pin = self.model.find('.//argument[@xmi:type="uml:InputPin"]', self.namespaces)
+        input_pins = self.model.findall('.//input[@xmi:type="uml:InputPin"]', self.namespaces)
         node_type = "InputPin"
-        node = self.parser.parse_activity_node(input_pin, self.namespaces, node_type)
+        node = self.parser.parse_activity_node(input_pins[0], self.namespaces, node_type)
         self.assertEqual(node.node_type, node_type)
 
     def test_parse_activity_node_visibility(self):
-        input_pin = self.model.find('.//argument[@xmi:type="uml:InputPin"]', self.namespaces)
-        node = self.parser.parse_activity_node(input_pin, self.namespaces, "InputPin")
-        self.assertEqual(node.visibility, None)
+        input_pins = self.model.findall('.//input[@xmi:type="uml:InputPin"]', self.namespaces)
+        node = self.parser.parse_activity_node(input_pins[0], self.namespaces, "InputPin")
+        self.assertEqual(node.visibility, "public")
 
     def test_parse_activity_node_ordering_data(self):
-        input_pin = self.model.find('.//argument[@xmi:type="uml:InputPin"]', self.namespaces)
-        node = self.parser.parse_activity_node(input_pin, self.namespaces, "InputPin")
+        input_pins = self.model.findall('.//input[@xmi:type="uml:InputPin"]', self.namespaces)
+        node = self.parser.parse_activity_node(input_pins[0], self.namespaces, "InputPin")
         self.assertEqual(node.ordering, "FIFO")
 
     def test_parse_activity_node_ordering_missing(self):
-        actions = set(self.model.findall('.//ownedMember[@xmi:type="uml:CallBehaviorAction"]', self.namespaces))
-        actions.update(self.model.findall('.//node[@xmi:type="uml:CallBehaviorAction"]', self.namespaces))
-        node = self.parser.parse_activity_node(list(actions)[0], self.namespaces, "Action")
+        actions = self.model.findall('.//node[@xmi:type="uml:Action"]', self.namespaces)
+        node = self.parser.parse_activity_node(actions[0], self.namespaces, "Action")
         self.assertEqual(node.ordering, None)
+
+    def test_parse_activity_node_empty(self):
+        with self.assertRaises(AttributeError):
+            self.parser.parse_activity_node(None, self.namespaces, "Action")
 
     def test_parse_actions_count(self):
         actions = self.parser.parse_actions(self.model, self.namespaces)
@@ -130,16 +137,12 @@ class TestEAActivityDiagramParser(unittest.TestCase):
         self.assertEqual(len(flow_finals), 0)
 
     def test_parse_flow_finals_count(self):
-        model = self.parser.get_model(
-            "/Users/fanda/fanda/Skola_2020-2021_ZS/Bakalarka/source/conceptual_model_parser/xmiExamples/VP_Activity/testingFlowBuffer.xmi",
-            self.namespaces)
+        model = self.parser.get_model("exquiro/tests/test_models/activity/ea_FlowFinal.xml", self.namespaces)
         flow_finals = self.parser.parse_flow_finals(model, self.namespaces)
         self.assertEqual(len(flow_finals), 1)
 
     def test_parse_flow_finals_type(self):
-        model = self.parser.get_model(
-            "/Users/fanda/fanda/Skola_2020-2021_ZS/Bakalarka/source/conceptual_model_parser/xmiExamples/VP_Activity/testingFlowBuffer.xmi",
-            self.namespaces)
+        model = self.parser.get_model("exquiro/tests/test_models/activity/ea_FlowFinal.xml", self.namespaces)
         flow_finals = self.parser.parse_flow_finals(model, self.namespaces)
         for flow in flow_finals:
             self.assertEqual(flow.node_type, "FlowFinal")
@@ -168,14 +171,14 @@ class TestEAActivityDiagramParser(unittest.TestCase):
 
     def test_parse_central_buffers_count(self):
         model = self.parser.get_model(
-            "/Users/fanda/fanda/Skola_2020-2021_ZS/Bakalarka/source/conceptual_model_parser/xmiExamples/VP_Activity/testingFlowBuffer.xmi",
+            "exquiro/tests/test_models/activity/ea_CentralBufferNode.xml",
             self.namespaces)
         buffers = self.parser.parse_central_buffers(model, self.namespaces)
         self.assertEqual(len(buffers), 1)
 
     def test_parse_central_buffers_type(self):
         model = self.parser.get_model(
-            "/Users/fanda/fanda/Skola_2020-2021_ZS/Bakalarka/source/conceptual_model_parser/xmiExamples/VP_Activity/testingFlowBuffer.xmi",
+            "exquiro/tests/test_models/activity/ea_CentralBufferNode.xml",
             self.namespaces)
         buffers = self.parser.parse_central_buffers(model, self.namespaces)
         for buffer in buffers:
@@ -184,7 +187,7 @@ class TestEAActivityDiagramParser(unittest.TestCase):
     def test_parse_flow_relation_id(self):
         c_flow = self.model.find('.//edge[@xmi:type="uml:ControlFlow"]', self.namespaces)
         flow = self.parser.parse_flow_relation(c_flow, self.namespaces, "ControlFlow")
-        self.assertEqual(flow.id, "1W2H0x6GAqAUOAac")
+        self.assertEqual(flow.id, "EAID_3D2AE4C1_536A_41cc_BE4D_348AFA0DA376")
 
     def test_parse_flow_relation_type(self):
         c_flow = self.model.find('.//edge[@xmi:type="uml:ControlFlow"]', self.namespaces)
@@ -195,12 +198,12 @@ class TestEAActivityDiagramParser(unittest.TestCase):
     def test_parse_flow_relation_target(self):
         c_flow = self.model.find('.//edge[@xmi:type="uml:ControlFlow"]', self.namespaces)
         flow = self.parser.parse_flow_relation(c_flow, self.namespaces, "ControlFlow")
-        self.assertEqual(flow.target, "8nGH0x6GAqAUOAaX")
+        self.assertEqual(flow.target, "EAID_F2D3CAD9_E086_4cb9_851B_6BF37D8BDD34")
 
     def test_parse_flow_relation_source(self):
         c_flow = self.model.find('.//edge[@xmi:type="uml:ControlFlow"]', self.namespaces)
         flow = self.parser.parse_flow_relation(c_flow, self.namespaces, "ControlFlow")
-        self.assertEqual(flow.source, "bIaH0x6GAqAUOAaK")
+        self.assertEqual(flow.source, "EAID_8408A357_401F_4622_802B_0B9F7DB0E884")
 
     def test_parse_flow_relation_guard_empty(self):
         c_flow = self.model.find('.//edge[@xmi:type="uml:ControlFlow"]', self.namespaces)
@@ -208,9 +211,9 @@ class TestEAActivityDiagramParser(unittest.TestCase):
         self.assertEqual(flow.guard, None)
 
     def test_parse_flow_relation_guard_exists(self):
-        c_flow = self.model.find('.//edge[@xmi:type="uml:ControlFlow"][@xmi:id="jbAn0x6GAqAUOAcn"]', self.namespaces)
+        c_flow = self.model.find('.//edge[@xmi:type="uml:ControlFlow"][@xmi:id="EAID_5125A0AC_4912_45f9_AC92_2D335FE6B382"]', self.namespaces)
         flow = self.parser.parse_flow_relation(c_flow, self.namespaces, "ControlFlow")
-        self.assertEqual(flow.guard, "Yes")
+        self.assertEqual(flow.guard, "No")
 
     def test_parse_flow_relation_error(self):
         with self.assertRaises(AttributeError):
@@ -245,16 +248,12 @@ class TestEAActivityDiagramParser(unittest.TestCase):
 
     def test_parse_partition_relations_count(self):
         rels = self.parser.parse_partition_relations(self.model, self.namespaces)
-        self.assertEqual(len(rels), 13)
+        self.assertEqual(len(rels), 11)
 
     def test_parse_partition_relations_type(self):
         rels = self.parser.parse_partition_relations(self.model, self.namespaces)
         for rel in rels:
             self.assertEqual(rel.relation_type, "PartitionMember")
-
-    def test_parse_flow_relation_error(self):
-        with self.assertRaises(AttributeError):
-            self.parser.parse_flow_relation(None, self.namespaces, "ControlFlow")
 
     def test_parse_partition_relation(self):
         pass

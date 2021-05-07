@@ -1,4 +1,4 @@
-from models.Model import Model
+from exquiro.models.model import Model
 
 
 class DiagramParser:
