@@ -19,10 +19,10 @@ class VPPackageParser(PackageDiagramParser):
     def parse_relations(self, model, namespaces):
         try:
             m_relations = self.parse_dependencies(model, namespaces)
-            m_relations.extend(self.parse_imports(model, namespaces))
-            m_relations.extend(self.parse_merges(model, namespaces))
+            m_relations.update(self.parse_imports(model, namespaces))
+            m_relations.update(self.parse_merges(model, namespaces))
             packages = self.get_packages(model, namespaces)
-            m_relations.extend(self.parse_member_packages(packages, namespaces))
+            m_relations.update(self.parse_member_packages(packages, namespaces))
         except AttributeError as exc:
             raise exc
         except Exception as exc:
@@ -36,10 +36,10 @@ class VPPackageParser(PackageDiagramParser):
             return model.attrib['{' + namespaces['xmi'] + '}' + 'id']
 
     def parse_packages(self, model, namespaces):
-        m_packages = []
+        m_packages = set()
         packages = self.get_packages(model, namespaces)
         for package in packages:
-            m_packages.append(self.parse_package(package, namespaces))
+            m_packages.add(self.parse_package(package, namespaces))
         return m_packages
 
     @staticmethod
@@ -68,24 +68,24 @@ class VPPackageParser(PackageDiagramParser):
         return PackageRelation(relation_id, relation_source, relation_target, relation_type)
 
     def parse_dependencies(self, model, namespaces):
-        m_dependencies = []
+        m_dependencies = set()
         dependencies = model.findall('.//ownedMember[@xmi:type="uml:Dependency"]', namespaces)
         for dependency in dependencies:
-            m_dependencies.append(self.parse_supplier_client_relation(dependency, namespaces, "Dependency"))
+            m_dependencies.add(self.parse_supplier_client_relation(dependency, namespaces, "Dependency"))
         return m_dependencies
 
     def parse_merges(self, model, namespaces):
-        m_merge = []
+        m_merge = set()
         merges = model.findall('.//packageMerge', namespaces)
         for merge in merges:
-            m_merge.append(self.parse_supplier_client_relation(merge, namespaces, "PackageMerge"))
+            m_merge.add(self.parse_supplier_client_relation(merge, namespaces, "PackageMerge"))
         return m_merge
 
     def parse_imports(self, model, namespaces):
-        m_imports = []
+        m_imports = set()
         imports = model.findall('.//packageImport', namespaces)
         for import_e in imports:
-            m_imports.append(self.parse_import(import_e, namespaces))
+            m_imports.add(self.parse_import(import_e, namespaces))
         return m_imports
 
     @staticmethod
@@ -104,12 +104,12 @@ class VPPackageParser(PackageDiagramParser):
         return PackageRelation(import_id, import_source, import_target, import_type)
 
     def parse_member_packages(self, packages, namespaces):
-        m_member_of = []
+        m_member_of = set()
         for package in packages:
             children = package.getchildren()
             for child in children:
                 if self.is_package(child, namespaces):
-                    m_member_of.append(self.parse_member_package(child, package, namespaces))
+                    m_member_of.add(self.parse_member_package(child, package, namespaces))
         return m_member_of
 
     @staticmethod
