@@ -34,8 +34,8 @@ class Exquiro():
         self.factory.register_parser('open_ponk', 'class_diagram', OpenponkClsDiagramParser)
         self.factory.register_parser('enterprise_architect', 'package_diagram', EAPackageDiagramParser)
         self.factory.register_parser('enterprise_architect', 'activity_diagram', EAActivityDiagramParser)
-        #self.factory.register_parser('visual_paradigm', 'package_diagram', VPPackageDiagramParser)
-        #self.factory.register_parser('visual_paradigm', 'activity_diagram', VPActivityDiagramParser)
+        self.factory.register_parser('visual_paradigm', 'package_diagram', VPPackageDiagramParser)
+        self.factory.register_parser('visual_paradigm', 'activity_diagram', VPActivityDiagramParser)
         self.factory.register_parser('open_ponk', 'package_diagram', OpenPonkPackageDiagramParser)
 
     def add_model_from_file(self, file_path, *model_metadata):
